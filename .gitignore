@@ -1,0 +1,27 @@
+build/bin
+node_modules
+frontend/dist
+frontend/wailsjs
+
+# Local data
+*.db
+*.db-shm
+*.db-wal
+chromedata/
+logs/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build artefacts
+*.exe
+*.exe~
+*.syso
+
+# Secrets - never commit
+.env
+.env.*
+!.env.example

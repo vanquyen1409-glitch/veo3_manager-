@@ -1,0 +1,46 @@
+{
+  "items": [],
+  "tabs": [
+    {
+      "text": "image\nHình ảnh",
+      "dataState": "inactive"
+    },
+    {
+      "text": "play_circle\nVideo",
+      "dataState": "active"
+    },
+    {
+      "text": "crop_free\nKhung hình",
+      "dataState": "active"
+    },
+    {
+      "text": "chrome_extension\nThành phần",
+      "dataState": "inactive"
+    },
+    {
+      "text": "crop_9_16\n9:16",
+      "dataState": "inactive"
+    },
+    {
+      "text": "crop_16_9\n16:9",
+      "dataState": "active"
+    },
+    {
+      "text": "1x",
+      "dataState": "inactive"
+    },
+    {
+      "text": "x2",
+      "dataState": "active"
+    },
+    {
+      "text": "x3",
+      "dataState": "inactive"
+    },
+    {
+      "text": "x4",
+      "dataState": "inactive"
+    }
+  ],
+  "radios": []
+}

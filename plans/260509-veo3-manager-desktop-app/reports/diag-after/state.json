@@ -1,0 +1,227 @@
+{
+  "url": "https://labs.google/fx/vi/tools/flow/project/c593c369-74b4-410c-a8d8-36bcf4208fa6",
+  "title": "Flow - May 09, 06:33 PM",
+  "scrollY": 0,
+  "vw": 1280,
+  "vh": 800,
+  "sh": 800,
+  "buttons": [
+    {
+      "text": "arrow_back\nQuay lại",
+      "x": 24,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "more_vert\nTuỳ chọn khác",
+      "x": 272,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": "menu",
+      "disabled": false
+    },
+    {
+      "text": "search\nTìm kiếm",
+      "x": 396,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "filter_list\nSắp xếp và lọc",
+      "x": 823,
+      "y": 18,
+      "w": 42,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": "menu",
+      "disabled": false
+    },
+    {
+      "text": "add\nThêm nội dung nghe nhìn",
+      "x": 946,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": "menu",
+      "disabled": false
+    },
+    {
+      "text": "play_movies\nTrình tạo cảnh",
+      "x": 986,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "settings_2\nXem chế độ cài đặt lưới ô",
+      "x": 1026,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": "menu",
+      "disabled": false
+    },
+    {
+      "text": "help\nTrợ giúp về sản phẩm",
+      "x": 1066,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "more_vert\nKhác",
+      "x": 1106,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": "menu",
+      "disabled": false
+    },
+    {
+      "text": "PRO",
+      "x": 1150,
+      "y": 14,
+      "w": 98,
+      "h": 48,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "dashboard\nnav_rail_all_media",
+      "x": 20,
+      "y": 76,
+      "w": 40,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "archive\nXem bản lưu trữ",
+      "x": 20,
+      "y": 680,
+      "w": 40,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "swap_horiz\nHoán đổi khung hình đầu tiên và cuối cùng",
+      "x": 413,
+      "y": 645,
+      "w": 32,
+      "h": 32,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "Video\ncrop_16_9\nx2",
+      "x": 805,
+      "y": 725,
+      "w": 89,
+      "h": 34,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": "menu",
+      "disabled": false
+    },
+    {
+      "text": "arrow_forward\nTạo",
+      "x": 899,
+      "y": 726,
+      "w": 32,
+      "h": 32,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    }
+  ],
+  "editors": [
+    {
+      "tag": "INPUT",
+      "role": null,
+      "contenteditable": null,
+      "placeholder": null,
+      "ariaLabel": "Văn bản có thể chỉnh sửa",
+      "x": 76,
+      "y": 26,
+      "w": 188,
+      "h": 24,
+      "visible": true
+    },
+    {
+      "tag": "INPUT",
+      "role": null,
+      "contenteditable": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "x": 434,
+      "y": 19,
+      "w": 370,
+      "h": 38,
+      "visible": true
+    },
+    {
+      "tag": "DIV",
+      "role": "textbox",
+      "contenteditable": "true",
+      "placeholder": null,
+      "ariaLabel": null,
+      "x": 351,
+      "y": 698,
+      "w": 564,
+      "h": 20,
+      "visible": true
+    },
+    {
+      "tag": "TEXTAREA",
+      "role": null,
+      "contenteditable": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "visible": false
+    }
+  ],
+  "headings": [],
+  "bodyTextHead": "arrow_back\nQuay lại\nmore_vert\nTuỳ chọn khác\nsearch\nTìm kiếm\nfilter_list\nSắp xếp và lọc\nadd\nThêm nội dung nghe nhìn\nplay_movies\nTrình tạo cảnh\nsettings_2\nXem chế độ cài đặt lưới ô\nhelp\nTrợ giúp về sản phẩm\nmore_vert\nKhác\nPRO\ndashboard\nnav_rail_all_media\narchive\nXem bản lưu trữ\nBắt đầu tạo hoặc thả nội dung nghe nhìn\nBắt đầu\nswap_horiz\nHoán đổi khung hình đầu tiên và cuối cùng\nKết thúc\n\nBạn muốn tạo gì?\n﻿\n\n\nVideo\ncrop_16_9\nx2\narrow_forward\nTạo\n\nFlow có thể mắc sai sót nên bạn hãy xác minh nội dung do công cụ này tạo\n\nFlow"
+}

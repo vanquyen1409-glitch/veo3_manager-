@@ -1,0 +1,20 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "veo3-manager",
+  "outputfilename": "veo3-manager",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "Van Quyen",
+    "email": "vanquyen1409@gmail.com"
+  },
+  "info": {
+    "companyName": "Van Quyen",
+    "productName": "VEO3 Manager",
+    "productVersion": "0.1.1",
+    "copyright": "Copyright © 2026 Van Quyen. All rights reserved.",
+    "comments": "VEO3 Manager - Automated AI video generation orchestrator built with Wails (Go + React)."
+  }
+}

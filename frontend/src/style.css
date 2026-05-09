@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design tokens ─────────────────────────────────────────────────────────
+ * Single source of truth for surface + text + border colors. The semantic
+ * utility classes below read these vars, so flipping the `.dark` class on
+ * <html> swaps the entire theme without touching components.
+ *
+ * Surfaces (3 levels + interactive):
+ *   bg-app    : page background
+ *   bg-panel  : cards / sidebar / titlebar
+ *   bg-elev   : default elevated (inputs, list items, code blocks)
+ *   bg-hover  : surface hover state
+ *   bg-active : surface pressed state
+ *
+ * Text:        strong | body | soft | muted | subtle
+ * Borders:     default | strong | focus
+ */
+
+@layer base {
+  :root {
+    --bg-app:        theme('colors.white');
+    --bg-panel:      theme('colors.slate.50');
+    --bg-elev:       theme('colors.slate.100');
+    --bg-hover:      theme('colors.slate.200');
+    --bg-active:     theme('colors.slate.300');
+    --border-default: theme('colors.slate.200');
+    --border-strong:  theme('colors.slate.300');
+    --border-focus:   theme('colors.accent.500');
+    --text-strong:   theme('colors.slate.900');
+    --text-body:     theme('colors.slate.700');
+    --text-soft:     theme('colors.slate.600');
+    --text-muted:    theme('colors.slate.500');
+    --text-subtle:   theme('colors.slate.400');
+    --placeholder:   theme('colors.slate.400');
+    --accent-soft-bg:    theme('colors.accent.100');
+    --accent-soft-fg:    theme('colors.accent.700');
+    --accent-soft-border: theme('colors.accent.300');
+    color-scheme: light;
+  }
+
+  .dark {
+    --bg-app:        theme('colors.slate.950');
+    --bg-panel:      theme('colors.slate.900');
+    --bg-elev:       theme('colors.slate.800');
+    --bg-hover:      theme('colors.slate.800');
+    --bg-active:     theme('colors.slate.700');
+    --border-default: theme('colors.slate.800');
+    --border-strong:  theme('colors.slate.700');
+    --border-focus:   theme('colors.accent.500');
+    --text-strong:   theme('colors.slate.100');
+    --text-body:     theme('colors.slate.200');
+    --text-soft:     theme('colors.slate.300');
+    --text-muted:    theme('colors.slate.400');
+    --text-subtle:   theme('colors.slate.500');
+    --placeholder:   theme('colors.slate.500');
+    --accent-soft-bg:    rgb(37 99 235 / 0.15);
+    --accent-soft-fg:    theme('colors.accent.300');
+    --accent-soft-border: rgb(37 99 235 / 0.30);
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: var(--bg-app);
+    color: var(--text-body);
+    font-family: 'Inter', system-ui, 'Segoe UI', sans-serif;
+    user-select: none;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+
+  input,
+  textarea,
+  select,
+  [contenteditable='true'] {
+    user-select: text;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply rounded-md px-2 py-1.5 text-sm outline-none;
+    background: var(--bg-elev);
+    border: 1px solid var(--border-default);
+    color: var(--text-body);
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--placeholder);
+  }
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--border-focus);
+  }
+
+  h1 { @apply text-lg font-semibold; color: var(--text-strong); }
+  h2 { @apply text-base font-semibold; color: var(--text-strong); }
+  h3 { @apply text-sm font-semibold; color: var(--text-strong); }
+
+  /* Code/pre blocks need a slightly elevated surface even in light mode. */
+  pre, code {
+    color: var(--text-body);
+  }
+}
+
+@layer components {
+  .surface-app   { background: var(--bg-app); }
+  .surface-panel { background: var(--bg-panel); border: 1px solid var(--border-default); }
+  .surface-elev  { background: var(--bg-elev); }
+
+  .hover-surface:hover  { background: var(--bg-hover); }
+  .active-surface:active { background: var(--bg-active); }
+
+  .text-strong  { color: var(--text-strong); }
+  .text-body    { color: var(--text-body); }
+  .text-soft    { color: var(--text-soft); }
+  .text-muted   { color: var(--text-muted); }
+  .text-subtle  { color: var(--text-subtle); }
+
+  .label {
+    @apply text-xs font-medium uppercase tracking-wide;
+    color: var(--text-subtle);
+  }
+
+  .divider        { border-color: var(--border-default); }
+  .divider-strong { border-color: var(--border-strong); }
+
+  /* Soft accent pill used by sidebar nav active state. */
+  .accent-soft {
+    background: var(--accent-soft-bg);
+    color: var(--accent-soft-fg);
+    border-color: var(--accent-soft-border);
+  }
+}
+
+/* ─── Custom scrollbar ───────────────────────────────────────────────────── */
+::-webkit-scrollbar         { width: 10px; height: 10px; }
+::-webkit-scrollbar-track   { background: transparent; }
+::-webkit-scrollbar-thumb   { background: rgb(100 116 139 / 0.4); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: rgb(100 116 139 / 0.6); }

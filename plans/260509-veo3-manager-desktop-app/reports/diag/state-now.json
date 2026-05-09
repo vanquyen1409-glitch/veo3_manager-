@@ -1,0 +1,190 @@
+{
+  "url": "https://labs.google/fx/vi/tools/flow",
+  "title": "Flow",
+  "nextDataKeys": [
+    "session",
+    "_nextI18Next"
+  ],
+  "sessionKeys": [
+    "user",
+    "expires",
+    "access_token"
+  ],
+  "sessionUserKeys": [
+    "name",
+    "email",
+    "image"
+  ],
+  "session.access_token_preview": "ya29.a0AQvPyIMFQeWuSKf_AUf_dQV…(416)",
+  "buttons": [
+    {
+      "text": "help_outlined\nTrung tâm trợ giúp về Flow\nTrung tâm trợ giúp ",
+      "x": 1058,
+      "y": 28,
+      "w": 24,
+      "h": 24,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "PRO",
+      "x": 1158,
+      "y": 16,
+      "w": 98,
+      "h": 48,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "See it in action.",
+      "x": 64,
+      "y": 326,
+      "w": 149,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "close",
+      "x": 1208,
+      "y": 88,
+      "w": 40,
+      "h": 47,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "edit\nChỉnh sửa dự án",
+      "x": 179,
+      "y": 709,
+      "w": 40,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "delete\nXoá dự án",
+      "x": 380,
+      "y": 709,
+      "w": 40,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "edit\nChỉnh sửa dự án",
+      "x": 564,
+      "y": 709,
+      "w": 40,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "delete\nXoá dự án",
+      "x": 796,
+      "y": 709,
+      "w": 40,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "edit\nChỉnh sửa dự án",
+      "x": 1100,
+      "y": 709,
+      "w": 40,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "delete\nXoá dự án",
+      "x": 1212,
+      "y": 709,
+      "w": 40,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "edit\nChỉnh sửa dự án",
+      "x": 275,
+      "y": 998,
+      "w": 40,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "delete\nXoá dự án",
+      "x": 380,
+      "y": 998,
+      "w": 40,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "edit\nChỉnh sửa dự án",
+      "x": 660,
+      "y": 998,
+      "w": 40,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "delete\nXoá dự án",
+      "x": 796,
+      "y": 998,
+      "w": 40,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "edit\nChỉnh sửa dự án",
+      "x": 1080,
+      "y": 998,
+      "w": 40,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "delete\nXoá dự án",
+      "x": 1212,
+      "y": 998,
+      "w": 40,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "add_2\nDự án mới",
+      "x": 640,
+      "y": 616,
+      "w": 192,
+      "h": 128,
+      "ariaHasPopup": null,
+      "disabled": false
+    }
+  ],
+  "editors": [
+    {
+      "tag": "TEXTAREA",
+      "role": null,
+      "contenteditable": null,
+      "placeholder": null,
+      "ariaLabel": null
+    }
+  ],
+  "tabs": [],
+  "menuitems": [],
+  "cookieNames": [
+    "_ga",
+    "EMAIL",
+    "_ga_X2GNH8R5NS"
+  ]
+}

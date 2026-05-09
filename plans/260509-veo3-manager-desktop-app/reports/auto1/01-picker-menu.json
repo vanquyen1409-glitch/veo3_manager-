@@ -1,0 +1,49 @@
+{
+  "items": [],
+  "tabs": [
+    {
+      "text": "image\nHình ảnh",
+      "dataState": "active"
+    },
+    {
+      "text": "play_circle\nVideo",
+      "dataState": "inactive"
+    },
+    {
+      "text": "crop_16_9\n16:9",
+      "dataState": "active"
+    },
+    {
+      "text": "crop_landscape\n4:3",
+      "dataState": "inactive"
+    },
+    {
+      "text": "crop_square\n1:1",
+      "dataState": "inactive"
+    },
+    {
+      "text": "crop_portrait\n3:4",
+      "dataState": "inactive"
+    },
+    {
+      "text": "crop_9_16\n9:16",
+      "dataState": "inactive"
+    },
+    {
+      "text": "1x",
+      "dataState": "inactive"
+    },
+    {
+      "text": "x2",
+      "dataState": "active"
+    },
+    {
+      "text": "x3",
+      "dataState": "inactive"
+    },
+    {
+      "text": "x4",
+      "dataState": "inactive"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+<Configuration>
+  <!--
+    Windows Sandbox config for testing the VEO3 Manager installer.
+
+    Double-click this file to launch a clean Windows VM. The installer folder
+    is mapped read-only into the sandbox at C:\installers, and File Explorer
+    auto-opens to it on logon. From there:
+
+      1. Double-click veo3-manager-amd64-installer.exe
+      2. Click through the install wizard (Welcome -> Next -> Next -> Install)
+      3. Open Start Menu -> "VEO3 Manager" to launch the app
+      4. Verify the icon, that the app window opens, that there are no
+         "WebView2 not found" errors (the installer should bundle the bootstrap)
+      5. Settings -> Apps -> uninstall to verify clean uninstall
+
+    Sandbox auto-resets on close, so any state inside is wiped.
+
+    Requires Windows 10/11 Pro or Enterprise with Windows Sandbox enabled:
+      Enable-WindowsOptionalFeature -Online -FeatureName "Containers-DisposableClientVM" -All
+  -->
+  <Networking>Default</Networking>
+  <vGPU>Enable</vGPU>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>C:\Users\Admin\veo3_manager_part_1\build\bin</HostFolder>
+      <SandboxFolder>C:\installers</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+    <Command>cmd.exe /c start "" "C:\installers"</Command>
+  </LogonCommand>
+</Configuration>

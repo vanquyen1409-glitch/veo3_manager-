@@ -1,0 +1,8 @@
+{"kind":"phase","phase":"start","ts":1778320844142,"url":"https://labs.google/fx/vi/tools/flow/project/2c642102-6882-4db7-99f0-0d50e98d3805"}
+{"kind":"phase","phase":"picker_opened","ts":1778320844145,"opened":true}
+{"kind":"phase","phase":"video_tab_clicked","ts":1778320845056,"videoTab":null}
+{"kind":"phase","phase":"menu_after_video","ts":1778320845760,"items":[],"tabs":[]}
+{"kind":"phase","phase":"veo_selected","ts":1778320845933,"veoSelected":null}
+{"kind":"phase","phase":"prompt_typed","ts":1778320847620,"len":46}
+{"kind":"phase","phase":"submit_clicked","ts":1778320848190,"ok":true,"x":899,"y":726,"text":"arrow_forward\nTạo"}
+{"kind":"phase","phase":"end","ts":1778320868321}

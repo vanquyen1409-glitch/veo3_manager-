@@ -1,0 +1,12 @@
+{"kind":"phase","phase":"start","ts":1778320754554,"url":"https://labs.google/fx/vi/tools/flow/project/2c642102-6882-4db7-99f0-0d50e98d3805"}
+{"kind":"phase","phase":"opening_model_picker","ts":1778320754554}
+{"kind":"request","id":"14088.1176","ts":1778320754578,"url":"https://aisandbox-pa.googleapis.com/v1/credits?key=AIzaSyBtrm0o5ab1c-Ec8ZuLcGt3oJAA5VWt3pY","method":"GET","headers":{"Referer":"https://labs.google/","User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36","Accept-Language":"en-US,en;q=0.9;q=0.9"},"body":null}
+{"kind":"response","id":"14088.1176","url":"https://aisandbox-pa.googleapis.com/v1/credits?key=AIzaSyBtrm0o5ab1c-Ec8ZuLcGt3oJAA5VWt3pY","status":200,"mimeType":"application/json"}
+{"kind":"response_body","id":"14088.1176","bodyLen":159,"bodyPreview":"{\n  \"credits\": 370,\n  \"userPaygateTier\": \"PAYGATE_TIER_ONE\",\n  \"sku\": \"G1_TIER1\",\n  \"serviceTier\": \"SERVICE_TIER_INTERMEDIATE\",\n  \"subscriptionCredits\": 370\n}\n"}
+{"kind":"phase","phase":"menu_dump","ts":1778320755727,"items":[],"tabs":[{"text":"image\nHình ảnh","dataState":"active"},{"text":"play_circle\nVideo","dataState":"inactive"},{"text":"crop_16_9\n16:9","dataState":"active"},{"text":"crop_landscape\n4:3","dataState":"inactive"},{"text":"crop_square\n1:1","dataState":"inactive"},{"text":"crop_portrait\n3:4","dataState":"inactive"},{"text":"crop_9_16\n9:16","dataState":"inactive"},{"text":"1x","dataState":"inactive"},{"text":"x2","dataState":"active"},{"text":"x3","dataState":"inactive"},{"text":"x4","dataState":"inactive"}]}
+{"kind":"phase","phase":"selected_model","ts":1778320755731,"selectedVeo":null}
+{"kind":"phase","phase":"focus_editor","ts":1778320756531}
+{"kind":"phase","phase":"inserted_prompt","ts":1778320756775,"len":65}
+{"kind":"phase","phase":"click_submit","ts":1778320757287}
+{"kind":"phase","phase":"submit_clicked","ts":1778320757337,"clicked":{"text":"add_2\nTạo","x":351,"y":726}}
+{"kind":"phase","phase":"end","ts":1778320772519}

@@ -1,0 +1,326 @@
+{
+  "url": "https://labs.google/fx/vi/tools/flow",
+  "title": "Flow",
+  "scrollY": 0,
+  "vw": 1280,
+  "vh": 800,
+  "sh": 800,
+  "buttons": [
+    {
+      "text": "help_outlined\nTrung tâm trợ giúp về Flow\nTrung tâm trợ giúp về Flow",
+      "x": 1058,
+      "y": 28,
+      "w": 24,
+      "h": 24,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "PRO",
+      "x": 1158,
+      "y": 16,
+      "w": 98,
+      "h": 48,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "open_in_new\nGo to Flow TV",
+      "x": 64,
+      "y": 326,
+      "w": 159,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "",
+      "x": 64,
+      "y": 406,
+      "w": 60,
+      "h": 4,
+      "visible": true,
+      "ariaLabel": "Go to banner 1",
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "",
+      "x": 130,
+      "y": 406,
+      "w": 60,
+      "h": 4,
+      "visible": true,
+      "ariaLabel": "Go to banner 2",
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "",
+      "x": 196,
+      "y": 406,
+      "w": 60,
+      "h": 4,
+      "visible": true,
+      "ariaLabel": "Go to banner 3",
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "",
+      "x": 262,
+      "y": 406,
+      "w": 60,
+      "h": 4,
+      "visible": true,
+      "ariaLabel": "Go to banner 4",
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "",
+      "x": 328,
+      "y": 406,
+      "w": 60,
+      "h": 4,
+      "visible": true,
+      "ariaLabel": "Go to banner 5",
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "",
+      "x": 64,
+      "y": 406,
+      "w": 60,
+      "h": 4,
+      "visible": true,
+      "ariaLabel": "Go to banner 1",
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "",
+      "x": 130,
+      "y": 406,
+      "w": 60,
+      "h": 4,
+      "visible": true,
+      "ariaLabel": "Go to banner 2",
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "",
+      "x": 196,
+      "y": 406,
+      "w": 60,
+      "h": 4,
+      "visible": true,
+      "ariaLabel": "Go to banner 3",
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "",
+      "x": 262,
+      "y": 406,
+      "w": 60,
+      "h": 4,
+      "visible": true,
+      "ariaLabel": "Go to banner 4",
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "",
+      "x": 328,
+      "y": 406,
+      "w": 60,
+      "h": 4,
+      "visible": true,
+      "ariaLabel": "Go to banner 5",
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "close",
+      "x": 1208,
+      "y": 88,
+      "w": 40,
+      "h": 47,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "edit\nChỉnh sửa dự án",
+      "x": 179,
+      "y": 709,
+      "w": 40,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "delete\nXoá dự án",
+      "x": 380,
+      "y": 709,
+      "w": 40,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "edit\nChỉnh sửa dự án",
+      "x": 564,
+      "y": 709,
+      "w": 40,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "delete\nXoá dự án",
+      "x": 796,
+      "y": 709,
+      "w": 40,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "edit\nChỉnh sửa dự án",
+      "x": 1100,
+      "y": 709,
+      "w": 40,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "delete\nXoá dự án",
+      "x": 1212,
+      "y": 709,
+      "w": 40,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "edit\nChỉnh sửa dự án",
+      "x": 275,
+      "y": 998,
+      "w": 40,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "delete\nXoá dự án",
+      "x": 380,
+      "y": 998,
+      "w": 40,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "edit\nChỉnh sửa dự án",
+      "x": 660,
+      "y": 998,
+      "w": 40,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "delete\nXoá dự án",
+      "x": 796,
+      "y": 998,
+      "w": 40,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "edit\nChỉnh sửa dự án",
+      "x": 1080,
+      "y": 998,
+      "w": 40,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "delete\nXoá dự án",
+      "x": 1212,
+      "y": 998,
+      "w": 40,
+      "h": 40,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "add_2\nDự án mới",
+      "x": 640,
+      "y": 616,
+      "w": 192,
+      "h": 128,
+      "visible": true,
+      "ariaLabel": null,
+      "ariaHasPopup": null,
+      "disabled": false
+    }
+  ],
+  "editors": [
+    {
+      "tag": "TEXTAREA",
+      "role": null,
+      "contenteditable": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "visible": false
+    }
+  ],
+  "headings": [
+    "Find your inspiration on Flow TV",
+    "Nano Banana 2 is Here!"
+  ],
+  "bodyTextHead": "Flow\ntv\nFlow TV\nhelp_outlined\nTrung tâm trợ giúp về Flow\nTrung tâm trợ giúp về Flow\nmore_vert\nPRO\nFind your inspiration on Flow TV\nHundreds of curated clips with prompts you can reuse and remix\nopen_in_new\nGo to Flow TV\nNano Banana 2 is Here!\nWe've updated the original Nano Banana model, with significant improvements in image generation, stylization, multiple references and editing.\nclose\nMay 09, 04:54 PM\nedit\nChỉnh sửa dự án\ndelete\nXoá dự án\n11:36 09 thg 5\nedit\nChỉnh sửa dự án\ndelete\nXoá dự án\nVeo3 Manager — May 09 01:11\nedit\nChỉnh sửa dự án\ndelete\nXoá dự án\nVeo3 Manager — May 09 01:09\nedit\nChỉnh sửa dự án\ndelete\nXoá dự án\nSubmit Test 1778263619572\nedit\nChỉnh sửa dự án\ndelete\nXoá dự án\nSubmit Test 1778263486077\nedit\nChỉnh sửa dự án\ndelete\nXoá dự án\nadd_2\nDự án mới"
+}

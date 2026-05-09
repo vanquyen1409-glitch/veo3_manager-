@@ -1,0 +1,193 @@
+{
+  "url": "https://labs.google/fx/vi/tools/flow/project/2c642102-6882-4db7-99f0-0d50e98d3805",
+  "title": "Flow - May 09, 04:54 PM",
+  "nextDataKeys": [
+    "session",
+    "_nextI18Next"
+  ],
+  "sessionKeys": [
+    "user",
+    "expires",
+    "access_token"
+  ],
+  "sessionUserKeys": [
+    "name",
+    "email",
+    "image"
+  ],
+  "session.access_token_preview": "ya29.a0AQvPyIMFQeWuSKf_AUf_dQV…(416)",
+  "buttons": [
+    {
+      "text": "arrow_back\nQuay lại",
+      "x": 24,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "more_vert\nTuỳ chọn khác",
+      "x": 272,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "ariaHasPopup": "menu",
+      "disabled": false
+    },
+    {
+      "text": "search\nTìm kiếm",
+      "x": 396,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "filter_list\nSắp xếp và lọc",
+      "x": 823,
+      "y": 18,
+      "w": 42,
+      "h": 40,
+      "ariaHasPopup": "menu",
+      "disabled": false
+    },
+    {
+      "text": "add\nThêm nội dung nghe nhìn",
+      "x": 946,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "ariaHasPopup": "menu",
+      "disabled": false
+    },
+    {
+      "text": "play_movies\nTrình tạo cảnh",
+      "x": 986,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "settings_2\nXem chế độ cài đặt lưới ô",
+      "x": 1026,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "ariaHasPopup": "menu",
+      "disabled": false
+    },
+    {
+      "text": "help\nTrợ giúp về sản phẩm",
+      "x": 1066,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "more_vert\nKhác",
+      "x": 1106,
+      "y": 22,
+      "w": 32,
+      "h": 32,
+      "ariaHasPopup": "menu",
+      "disabled": false
+    },
+    {
+      "text": "PRO",
+      "x": 1150,
+      "y": 14,
+      "w": 98,
+      "h": 48,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "dashboard\nnav_rail_all_media",
+      "x": 20,
+      "y": 76,
+      "w": 40,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "archive\nXem bản lưu trữ",
+      "x": 20,
+      "y": 680,
+      "w": 40,
+      "h": 40,
+      "ariaHasPopup": null,
+      "disabled": false
+    },
+    {
+      "text": "add_2\nTạo",
+      "x": 351,
+      "y": 726,
+      "w": 32,
+      "h": 32,
+      "ariaHasPopup": "dialog",
+      "disabled": false
+    },
+    {
+      "text": "🍌 Nano Banana 2\ncrop_16_9\nx2",
+      "x": 739,
+      "y": 725,
+      "w": 156,
+      "h": 34,
+      "ariaHasPopup": "menu",
+      "disabled": false
+    },
+    {
+      "text": "arrow_forward\nTạo",
+      "x": 899,
+      "y": 726,
+      "w": 32,
+      "h": 32,
+      "ariaHasPopup": null,
+      "disabled": false
+    }
+  ],
+  "editors": [
+    {
+      "tag": "INPUT",
+      "role": null,
+      "contenteditable": null,
+      "placeholder": null,
+      "ariaLabel": "Văn bản có thể chỉnh sửa"
+    },
+    {
+      "tag": "INPUT",
+      "role": null,
+      "contenteditable": null,
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "DIV",
+      "role": "textbox",
+      "contenteditable": "true",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "TEXTAREA",
+      "role": null,
+      "contenteditable": null,
+      "placeholder": null,
+      "ariaLabel": null
+    }
+  ],
+  "tabs": [],
+  "menuitems": [],
+  "cookieNames": [
+    "_ga",
+    "EMAIL",
+    "_ga_X2GNH8R5NS"
+  ]
+}

@@ -286,6 +286,80 @@ func TestWorker_SubmitErrorFailsImmediately(t *testing.T) {
 	}
 }
 
+// TestWorker_ParallelDownloads proves the MaxParallelDl setting is wired
+// into the worker's download loop. With 4 outputs and parallel=4, the
+// concurrency observed mid-flight must be > 1.
+func TestWorker_ParallelDownloads(t *testing.T) {
+	w, api, _, _, tr := newWorkerWithFakes(t)
+	// Crank parallel up; reuse same SetBundle pattern.
+	bundle, _ := w.deps.Settings.GetBundle()
+	bundle.MaxParallelDl = 4
+	if err := w.deps.Settings.SetBundle(bundle); err != nil {
+		t.Fatal(err)
+	}
+
+	api.submitRefs = []labsapi.MediaRef{
+		{MediaID: "m-1", Seed: 1},
+		{MediaID: "m-2", Seed: 2},
+		{MediaID: "m-3", Seed: 3},
+		{MediaID: "m-4", Seed: 4},
+	}
+	api.waitResults = []waitResult{{
+		finals: []labsapi.FinalMedia{
+			{MediaRef: labsapi.MediaRef{MediaID: "m-1", Seed: 1}, Status: labsapi.StatusSuccessful},
+			{MediaRef: labsapi.MediaRef{MediaID: "m-2", Seed: 2}, Status: labsapi.StatusSuccessful},
+			{MediaRef: labsapi.MediaRef{MediaID: "m-3", Seed: 3}, Status: labsapi.StatusSuccessful},
+			{MediaRef: labsapi.MediaRef{MediaID: "m-4", Seed: 4}, Status: labsapi.StatusSuccessful},
+		},
+	}}
+
+	// Replace the dummy downloader with one that holds each call until all
+	// 4 are in flight, proving they run concurrently.
+	concurrent := &concurrentMaxDownloader{wantInflight: 4, hold: 80 * time.Millisecond}
+	w.deps.Download = concurrent
+
+	task := enqueueOne(t, w, "parallel-dl")
+	if err := w.Start(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	defer w.Stop()
+
+	got := waitForStatus(t, tr, task.ID, db.StatusSucceeded, 5*time.Second)
+
+	if concurrent.peak.Load() < 2 {
+		t.Errorf("peak concurrency = %d, want >= 2 (parallelDl was %d)",
+			concurrent.peak.Load(), bundle.MaxParallelDl)
+	}
+	if len(got.VideoPaths) != 4 {
+		t.Errorf("VideoPaths len = %d, want 4 (all 4 outputs saved)", len(got.VideoPaths))
+	}
+}
+
+// concurrentMaxDownloader records the peak number of in-flight Fetch calls.
+type concurrentMaxDownloader struct {
+	wantInflight int
+	hold         time.Duration
+	inflight     atomic.Int32
+	peak         atomic.Int32
+}
+
+func (d *concurrentMaxDownloader) Fetch(ctx context.Context, _, _ string, _ download.ProgressFn) error {
+	now := d.inflight.Add(1)
+	for {
+		p := d.peak.Load()
+		if now <= p || d.peak.CompareAndSwap(p, now) {
+			break
+		}
+	}
+	defer d.inflight.Add(-1)
+	select {
+	case <-time.After(d.hold):
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+	return nil
+}
+
 func TestWorker_DownloadFailureKeepsTaskFailed(t *testing.T) {
 	// When ALL downloads fail, the task is marked failed (the worker only
 	// considers it succeeded if at least one path saved).

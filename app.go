@@ -97,6 +97,20 @@ func (a *App) Startup(ctx context.Context) {
 		Download: a.downloader,
 	})
 	a.worker.Bind(ctx)
+
+	// Background browser warm-up: kick off Ensure() right after Startup so
+	// Chrome connects + the labs.google tab loads while the user is still
+	// looking at the splash. By the time they click "Submit" on a prompt,
+	// the worker can skip the cold-connect path (~2-3 s saved on first task).
+	//
+	// We run this in a goroutine so a flaky Chrome env doesn't block the
+	// UI from coming up. Errors are logged-only - the user can still
+	// trigger Ensure() manually from the connect button.
+	go func() {
+		if _, err := a.browser.Ensure(ctx); err != nil {
+			log.Printf("browser warm-up: %v", err)
+		}
+	}()
 }
 
 func (a *App) DOMReady(ctx context.Context) {}
@@ -111,6 +125,9 @@ func (a *App) Shutdown(ctx context.Context) {
 		a.browser.Stop()
 	}
 	if a.sqlDB != nil {
+		// Fold the WAL back into the main DB so we don't leave a 100MB+
+		// queue.db-wal sidecar. Best-effort; closes regardless.
+		db.CheckpointOnClose(a.sqlDB)
 		_ = a.sqlDB.Close()
 	}
 }
@@ -148,7 +165,25 @@ func (a *App) initPaths() error {
 	if err := os.MkdirAll(a.outputDir, 0o755); err != nil {
 		return err
 	}
+	// Writability probe: catch permission/quota issues at startup, not on
+	// the first task. Failed probe is logged but non-fatal so the user can
+	// still open Settings and pick a different output dir.
+	if err := probeWritable(a.outputDir); err != nil {
+		log.Printf("output dir not writable (%s): %v - reconfigure in Settings", a.outputDir, err)
+	}
 	return nil
+}
+
+// probeWritable creates and removes a tiny sentinel file. Cheaper than a real
+// download attempt and surfaces the same EACCES / read-only errors.
+func probeWritable(dir string) error {
+	probe := filepath.Join(dir, ".veo3-write-probe")
+	f, err := os.Create(probe)
+	if err != nil {
+		return err
+	}
+	_ = f.Close()
+	return os.Remove(probe)
 }
 
 // registerLocalFileRoots adds the default output dir plus the user-configured

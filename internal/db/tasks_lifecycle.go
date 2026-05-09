@@ -4,46 +4,82 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
 
+// MaxAttempts caps automatic re-runs. A task that reaches this many starts
+// without a terminal success is marked failed instead of being claimed
+// again. Catches the runaway loop where a task bug makes the worker crash,
+// ResetStaleRunning recovers it on next start, the same crash repeats.
+const MaxAttempts = 5
+
 // NextPending claims the oldest pending row by flipping it to running atomically.
 // Returns nil, nil when there is nothing to do.
+//
+// Tasks whose attempts are already at MaxAttempts are auto-failed in the
+// same transaction (so they don't sit forever in pending) and skipped.
 func (r *TaskRepo) NextPending() (*Task, error) {
 	r.wmu.Lock()
 	defer r.wmu.Unlock()
 
-	tx, err := r.db.Begin()
-	if err != nil {
-		return nil, err
-	}
-	row := tx.QueryRow(`SELECT id FROM tasks WHERE status = ? ORDER BY created_at ASC LIMIT 1`, StatusPending)
-	var id string
-	if err := row.Scan(&id); err != nil {
-		_ = tx.Rollback()
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
+	for {
+		tx, err := r.db.Begin()
+		if err != nil {
+			return nil, err
 		}
-		return nil, err
+		var id string
+		var attempts int
+		row := tx.QueryRow(
+			`SELECT id, attempts FROM tasks WHERE status = ? ORDER BY created_at ASC LIMIT 1`,
+			StatusPending,
+		)
+		if err := row.Scan(&id, &attempts); err != nil {
+			_ = tx.Rollback()
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, nil
+			}
+			return nil, err
+		}
+		// Cap reached - mark failed in this same tx and look for next one.
+		if attempts >= MaxAttempts {
+			finishedAt := time.Now().UTC()
+			if _, err := tx.Exec(
+				`UPDATE tasks
+				 SET status = ?, error = ?, finished_at = ?
+				 WHERE id = ?`,
+				StatusFailed,
+				fmt.Sprintf("aborted after %d attempts (cap reached)", attempts),
+				finishedAt, id,
+			); err != nil {
+				_ = tx.Rollback()
+				return nil, err
+			}
+			if err := tx.Commit(); err != nil {
+				return nil, err
+			}
+			continue // try the next pending row
+		}
+
+		now := time.Now().UTC()
+		if _, err := tx.Exec(
+			`UPDATE tasks SET status = ?, started_at = ?, attempts = attempts + 1 WHERE id = ?`,
+			StatusRunning, now, id,
+		); err != nil {
+			_ = tx.Rollback()
+			return nil, err
+		}
+		if err := tx.Commit(); err != nil {
+			return nil, err
+		}
+		t, err := r.Get(id)
+		if err != nil {
+			return nil, err
+		}
+		return &t, nil
 	}
-	now := time.Now().UTC()
-	if _, err := tx.Exec(
-		`UPDATE tasks SET status = ?, started_at = ?, attempts = attempts + 1 WHERE id = ?`,
-		StatusRunning, now, id,
-	); err != nil {
-		_ = tx.Rollback()
-		return nil, err
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, err
-	}
-	t, err := r.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	return &t, nil
 }
 
 // UpdateStatus changes status + optional error message; sets finished_at on terminal states.

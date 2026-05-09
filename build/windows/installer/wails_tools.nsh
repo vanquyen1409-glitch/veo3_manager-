@@ -14,7 +14,7 @@
     !define INFO_PRODUCTNAME "VEO3 Manager"
 !endif
 !ifndef INFO_PRODUCTVERSION
-    !define INFO_PRODUCTVERSION "0.1.1"
+    !define INFO_PRODUCTVERSION "0.2.0"
 !endif
 !ifndef INFO_COPYRIGHT
     !define INFO_COPYRIGHT "Copyright © 2026 Van Quyen. All rights reserved."

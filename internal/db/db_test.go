@@ -389,6 +389,36 @@ func TestRequeue_CreatesNewPendingClone(t *testing.T) {
 	}
 }
 
+func TestNextPending_CapsAttemptsAndSkips(t *testing.T) {
+	tr, _ := newTestDB(t)
+	stuck := mustEnqueue(t, tr, "stuck")
+	healthy := mustEnqueue(t, tr, "healthy")
+
+	// Force the stuck row's attempts to MaxAttempts so the next claim
+	// must auto-fail it and skip to healthy.
+	if _, err := tr.db.Exec(
+		`UPDATE tasks SET attempts = ? WHERE id = ?`, MaxAttempts, stuck.ID,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := tr.NextPending()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got == nil || got.ID != healthy.ID {
+		t.Fatalf("got %+v, want claim of healthy task %s", got, healthy.ID)
+	}
+
+	stuckRow, _ := tr.Get(stuck.ID)
+	if stuckRow.Status != StatusFailed {
+		t.Errorf("stuck task status = %s, want failed (cap reached)", stuckRow.Status)
+	}
+	if stuckRow.Error == "" {
+		t.Error("stuck task error message empty - user can't see why it was aborted")
+	}
+}
+
 func TestDelete_RemovesRow(t *testing.T) {
 	tr, _ := newTestDB(t)
 	task := mustEnqueue(t, tr, "doomed")

@@ -28,7 +28,13 @@ func (s *Service) ProjectID() string {
 	if err != nil || info == nil {
 		return ""
 	}
-	u, err := url.Parse(info.URL)
+	return parseProjectIDFromURL(info.URL)
+}
+
+// parseProjectIDFromURL is the pure URL-parsing half of ProjectID. Lifted out
+// so it's unit-testable without mocking *rod.Page.
+func parseProjectIDFromURL(rawURL string) string {
+	u, err := url.Parse(rawURL)
 	if err != nil {
 		return ""
 	}

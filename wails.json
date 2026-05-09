@@ -13,7 +13,7 @@
   "info": {
     "companyName": "Van Quyen",
     "productName": "VEO3 Manager",
-    "productVersion": "0.1.2",
+    "productVersion": "0.2.0",
     "copyright": "Copyright © 2026 Van Quyen. All rights reserved.",
     "comments": "VEO3 Manager - Automated AI video generation orchestrator built with Wails (Go + React)."
   }

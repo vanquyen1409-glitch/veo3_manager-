@@ -64,6 +64,9 @@ jobs:
       - name: TypeScript typecheck
         run: npx tsc --noEmit
 
+      - name: Vitest
+        run: npm test
+
       # eslint is best-effort: only fail CI when the lint script exists
       # in package.json. Avoids forcing every developer to wire eslint
       # before they can push.

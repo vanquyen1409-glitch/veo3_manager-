@@ -3,11 +3,28 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
 	_ "modernc.org/sqlite"
 )
+
+// CheckpointOnClose runs `PRAGMA wal_checkpoint(TRUNCATE)` to fold the WAL
+// file back into the main DB and shrink it to zero on exit. Without this,
+// long-running sessions can leave a multi-hundred-MB queue.db-wal sidecar
+// that never gets reclaimed because SQLite only checkpoints opportunistically.
+//
+// Errors are logged-only (not returned) - this is best-effort cleanup, the
+// data is safe regardless.
+func CheckpointOnClose(db *sql.DB) {
+	if db == nil {
+		return
+	}
+	if _, err := db.Exec(`PRAGMA wal_checkpoint(TRUNCATE)`); err != nil {
+		slog.Warn("wal_checkpoint failed", "err", err)
+	}
+}
 
 // Open initializes the SQLite database at <appDataDir>/queue.db, applies
 // pragmas, and runs idempotent migrations. Caller owns the *sql.DB.

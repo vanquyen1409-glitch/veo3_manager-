@@ -1,0 +1,50 @@
+# golangci-lint config for VEO3 Manager.
+# Conservative defaults - we want signal, not noise.
+# Run locally: golangci-lint run
+
+run:
+  timeout: 5m
+  tests: true                # also lint *_test.go files
+  modules-download-mode: readonly
+
+issues:
+  # Don't hide repeated issues from the same linter; show all so we can
+  # decide systematically.
+  max-same-issues: 0
+  exclude-rules:
+    # Test files often need patterns the prod code lints would flag (long
+    # tables, magic numbers in fixtures). Exempt staticcheck SA1019 in
+    # test code so deprecated-but-deliberate calls are allowed.
+    - path: _test\.go
+      linters:
+        - errcheck     # _ = err.Close() in cleanup is fine
+        - gocyclo
+
+linters:
+  disable-all: true
+  enable:
+    - errcheck       # unhandled errors
+    - govet          # printf, lock copying, shadowing
+    - ineffassign    # assignments whose value is never used
+    - staticcheck    # SA*, ST* checks
+    - unused         # dead code, unused vars
+    - gosimple       # S* simplification suggestions
+    - typecheck      # baseline
+    - misspell       # english typos in comments + strings
+    - bodyclose      # http.Response.Body never closed
+    - rowserrcheck   # sql.Rows.Err() forgotten
+    - sqlclosecheck  # sql.Rows / sql.Stmt not closed
+    - prealloc       # slice not pre-allocated where size is known
+
+linters-settings:
+  errcheck:
+    exclude-functions:
+      # Wails runtime emit + slog Output have no actionable error path.
+      - (github.com/wailsapp/wails/v2/pkg/runtime).EventsEmit
+  misspell:
+    locale: US
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment  # noise > signal for this codebase size
+      - shadow          # too many false positives in error-handling pattern

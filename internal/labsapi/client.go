@@ -11,9 +11,12 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
+
+	"veo3-manager/internal/browser"
 )
 
 // PageFetcher abstracts the labs.google tab. Implemented by *browser.Service.
@@ -23,6 +26,8 @@ type PageFetcher interface {
 	PageFetch(ctx context.Context, method, fullURL, token, jsonBody string) ([]byte, error)
 	// Token returns a fresh bearer token (re-extracts on demand).
 	Token(ctx context.Context) (string, error)
+	// Refresh forces a token re-extraction (called on 401).
+	Refresh(ctx context.Context) error
 	// RecaptchaToken yields a single-use reCAPTCHA Enterprise token.
 	RecaptchaToken(ctx context.Context) (string, error)
 	// ProjectID returns the active Flow project UUID, or "" if none.
@@ -66,12 +71,13 @@ func RandSeed() int64 {
 }
 
 // fetchJSON marshals body, calls PageFetch, and unmarshals into out.
+//
+// Transparently retries once on 401 after refreshing the bearer token. This
+// covers the common case where the cached token has just crossed Google's
+// ~30-min expiry while the worker is between submit and poll. Without this,
+// every long-running task would fail mid-flight and the user would have to
+// requeue manually.
 func (c *Client) fetchJSON(ctx context.Context, method, path string, body, out any) error {
-	token, err := c.page.Token(ctx)
-	if err != nil {
-		return fmt.Errorf("token: %w", err)
-	}
-
 	bodyJSON := ""
 	if body != nil {
 		b, err := json.Marshal(body)
@@ -81,9 +87,27 @@ func (c *Client) fetchJSON(ctx context.Context, method, path string, body, out a
 		bodyJSON = string(b)
 	}
 
-	started := time.Now()
-	raw, err := c.page.PageFetch(ctx, method, BaseURL+path, token, bodyJSON)
-	c.log.Debug("labsapi", "method", method, "path", path, "ms", time.Since(started).Milliseconds(), "err", err)
+	doOnce := func() ([]byte, error) {
+		token, err := c.page.Token(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("token: %w", err)
+		}
+		started := time.Now()
+		raw, err := c.page.PageFetch(ctx, method, BaseURL+path, token, bodyJSON)
+		c.log.Debug("labsapi", "method", method, "path", path,
+			"ms", time.Since(started).Milliseconds(), "err", err)
+		return raw, err
+	}
+
+	raw, err := doOnce()
+	if errors.Is(err, browser.ErrUnauthorized) {
+		c.log.Info("labsapi 401 - refreshing token and retrying once",
+			"method", method, "path", path)
+		if rerr := c.page.Refresh(ctx); rerr != nil {
+			return fmt.Errorf("token refresh after 401: %w (orig: %v)", rerr, err)
+		}
+		raw, err = doOnce()
+	}
 	if err != nil {
 		return err
 	}

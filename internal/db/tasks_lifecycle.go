@@ -80,24 +80,22 @@ func (r *TaskRepo) SaveMediaIDs(id string, ids []string) error {
 }
 
 // AppendOutput pushes a single video path onto the task's video_paths JSON array.
+//
+// Done atomically inside the database via SQLite's json_insert() so a process
+// crash between read and write cannot lose a path. Falls back to '[]' when
+// the column is NULL on an older row.
 func (r *TaskRepo) AppendOutput(id, videoPath string) error {
 	r.wmu.Lock()
 	defer r.wmu.Unlock()
 
-	var raw sql.NullString
-	if err := r.db.QueryRow(`SELECT video_paths FROM tasks WHERE id = ?`, id).Scan(&raw); err != nil {
-		return err
-	}
-	var paths []string
-	if raw.Valid && raw.String != "" {
-		_ = json.Unmarshal([]byte(raw.String), &paths)
-	}
-	paths = append(paths, videoPath)
-	b, err := json.Marshal(paths)
-	if err != nil {
-		return err
-	}
-	_, err = r.db.Exec(`UPDATE tasks SET video_paths = ? WHERE id = ?`, string(b), id)
+	// json_insert(target, '$[#]', value) appends to the end of a JSON array.
+	// The '#' index is SQLite-specific shorthand for "next array slot".
+	_, err := r.db.Exec(
+		`UPDATE tasks
+		 SET video_paths = json_insert(COALESCE(video_paths, '[]'), '$[#]', ?)
+		 WHERE id = ?`,
+		videoPath, id,
+	)
 	return err
 }
 

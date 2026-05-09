@@ -128,6 +128,12 @@ func (s *Service) PageFetch(ctx context.Context, method, fullURL, token, jsonBod
 		if len(body) > 600 {
 			body = body[:600] + "…"
 		}
+		// 401 is the recoverable case (token expired). Return a wrapped
+		// sentinel so callers (labsapi.Client) can detect it with errors.Is
+		// and trigger a token refresh + single retry.
+		if wrap.Status == 401 {
+			return nil, fmt.Errorf("%w: %s %s: %s", ErrUnauthorized, method, fullURL, body)
+		}
 		return nil, fmt.Errorf("labsapi %s %s: status %d: %s", method, fullURL, wrap.Status, body)
 	}
 	return []byte(wrap.Body), nil

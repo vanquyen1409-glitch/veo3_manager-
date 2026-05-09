@@ -46,14 +46,28 @@ func (r *TaskRepo) List(f ListFilter) ([]Task, error) {
 	if len(clauses) > 0 {
 		where = "WHERE " + strings.Join(clauses, " AND ")
 	}
-	orderBy := "created_at"
-	if f.OrderBy == "finished_at" {
-		orderBy = "finished_at"
+	// orderBy/dir come through a strict allowlist - if any future caller passes
+	// a value outside these maps it falls back to the default. This is the
+	// belt-and-braces guard for ORDER BY (cannot be parameterised in SQL).
+	allowedOrderBy := map[string]string{
+		"created_at":  "created_at",
+		"finished_at": "finished_at",
 	}
-	dir := "DESC"
-	if strings.EqualFold(f.OrderDir, "asc") {
-		dir = "ASC"
+	orderBy, ok := allowedOrderBy[f.OrderBy]
+	if !ok {
+		orderBy = "created_at"
 	}
+	allowedDir := map[string]string{
+		"asc":  "ASC",
+		"ASC":  "ASC",
+		"desc": "DESC",
+		"DESC": "DESC",
+	}
+	dir, ok := allowedDir[f.OrderDir]
+	if !ok {
+		dir = "DESC"
+	}
+
 	limit := f.Limit
 	if limit <= 0 || limit > 500 {
 		limit = 50
@@ -63,13 +77,17 @@ func (r *TaskRepo) List(f ListFilter) ([]Task, error) {
 		offset = 0
 	}
 
+	// LIMIT and OFFSET are now parameterised (?) so they can never be string-
+	// concatenated - even though they were ints, this is the cheaper-than-
+	// auditing-forever pattern.
 	q := fmt.Sprintf(
 		`SELECT id, prompt, config_json, status, COALESCE(error,''),
 		        COALESCE(media_ids,''), COALESCE(video_paths,''), COALESCE(thumb_paths,''),
 		        attempts, created_at, started_at, finished_at, COALESCE(source_task_id,'')
-		 FROM tasks %s ORDER BY %s %s LIMIT %d OFFSET %d`,
-		where, orderBy, dir, limit, offset,
+		 FROM tasks %s ORDER BY %s %s LIMIT ? OFFSET ?`,
+		where, orderBy, dir,
 	)
+	args = append(args, limit, offset)
 	rows, err := r.db.Query(q, args...)
 	if err != nil {
 		return nil, err

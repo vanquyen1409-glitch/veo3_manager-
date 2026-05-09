@@ -6,19 +6,38 @@ import (
 	"log/slog"
 	"sync"
 
-	"veo3-manager/internal/browser"
 	"veo3-manager/internal/db"
 	"veo3-manager/internal/download"
 	"veo3-manager/internal/labsapi"
 )
 
+// APIPort is the subset of *labsapi.Client the worker needs. Defining it as
+// a local interface lets tests inject a fake API without touching real
+// labs.google. *labsapi.Client satisfies it without any code changes.
+type APIPort interface {
+	Submit(ctx context.Context, prompt string, cfg labsapi.SubmitConfig) ([]labsapi.MediaRef, error)
+	Wait(ctx context.Context, refs []labsapi.MediaRef, opts labsapi.PollOptions) ([]labsapi.FinalMedia, error)
+}
+
+// BrowserPort is the subset of *browser.Service the worker needs.
+// *browser.Service satisfies it without any code changes.
+type BrowserPort interface {
+	EnsureProjectView() error
+}
+
+// DownloadPort is the subset of *download.Downloader the worker needs.
+// *download.Downloader satisfies it without any code changes.
+type DownloadPort interface {
+	Fetch(ctx context.Context, redirectURL, dstPath string, onProgress download.ProgressFn) error
+}
+
 // Deps bundles the services the worker orchestrates.
 type Deps struct {
 	Tasks    *db.TaskRepo
 	Settings *db.SettingsRepo
-	Browser  *browser.Service
-	API      *labsapi.Client
-	Download *download.Downloader
+	Browser  BrowserPort
+	API      APIPort
+	Download DownloadPort
 	Logger   *slog.Logger
 }
 

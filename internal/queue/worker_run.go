@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -253,14 +252,10 @@ func buildSubmitConfig(cfg db.GenerationConfig) labsapi.SubmitConfig {
 }
 
 // isPollTimeout returns true when the error came from labsapi.Wait reaching
-// its deadline. labsapi formats it as "poll timeout after <duration>". We
-// match by substring rather than a sentinel because the labs package builds
-// it via fmt.Errorf without a wrapped sentinel.
+// its deadline. We test the wrapped sentinel so a future tweak to the error
+// message wording can't silently disable the retry path.
 func isPollTimeout(err error) bool {
-	if err == nil {
-		return false
-	}
-	return strings.Contains(err.Error(), "poll timeout")
+	return errors.Is(err, labsapi.ErrPollTimeout)
 }
 
 func (w *Worker) failTask(id string, err error) {

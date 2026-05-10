@@ -72,9 +72,11 @@ func httpDownload(ctx context.Context, c *http.Client, url, dst string, onProgre
 		}
 	}
 
-	if err := f.Sync(); err != nil {
-		return err
-	}
+	// No fsync: a 50 MB video pays ~50-200 ms per file on HDD, 5-30 ms on SSD.
+	// Atomic rename only promotes fully written content to the final name; on
+	// soft errors the deferred Remove cleans the .part. Durability across
+	// power loss is not a goal for a desktop video downloader — a crashed
+	// .part is just disk waste, never appears as a "complete" file.
 	if err := f.Close(); err != nil {
 		return err
 	}

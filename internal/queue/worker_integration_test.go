@@ -190,8 +190,8 @@ func TestWorker_PollTimeoutRetriesThenSucceeds(t *testing.T) {
 
 	api.submitRefs = []labsapi.MediaRef{{MediaID: "m-1", Seed: 7}}
 	api.waitResults = []waitResult{
-		{err: errors.New("poll timeout after 5m0s")},
-		{err: errors.New("poll timeout after 10m0s")},
+		{err: fmt.Errorf("%w after 5m0s", labsapi.ErrPollTimeout)},
+		{err: fmt.Errorf("%w after 10m0s", labsapi.ErrPollTimeout)},
 		{finals: []labsapi.FinalMedia{{
 			MediaRef: labsapi.MediaRef{MediaID: "m-1", Seed: 7},
 			Status:   labsapi.StatusSuccessful,
@@ -218,9 +218,9 @@ func TestWorker_PollTimeoutAllRetriesExhausted(t *testing.T) {
 
 	api.submitRefs = []labsapi.MediaRef{{MediaID: "m-1", Seed: 7}}
 	api.waitResults = []waitResult{
-		{err: errors.New("poll timeout after 5m0s")},
-		{err: errors.New("poll timeout after 10m0s")},
-		{err: errors.New("poll timeout after 20m0s")},
+		{err: fmt.Errorf("%w after 5m0s", labsapi.ErrPollTimeout)},
+		{err: fmt.Errorf("%w after 10m0s", labsapi.ErrPollTimeout)},
+		{err: fmt.Errorf("%w after 20m0s", labsapi.ErrPollTimeout)},
 	}
 
 	task := enqueueOne(t, w, "retry-fail")

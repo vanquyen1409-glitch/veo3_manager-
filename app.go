@@ -106,11 +106,13 @@ func (a *App) Startup(ctx context.Context) {
 	// We run this in a goroutine so a flaky Chrome env doesn't block the
 	// UI from coming up. Errors are logged-only - the user can still
 	// trigger Ensure() manually from the connect button.
-	go func() {
-		if _, err := a.browser.Ensure(ctx); err != nil {
-			log.Printf("browser warm-up: %v", err)
-		}
-	}()
+	if ctx != nil {
+		go func() {
+			if _, err := a.browser.Ensure(ctx); err != nil {
+				log.Printf("browser warm-up: %v", err)
+			}
+		}()
+	}
 }
 
 func (a *App) DOMReady(ctx context.Context) {}
@@ -175,14 +177,19 @@ func (a *App) initPaths() error {
 }
 
 // probeWritable creates and removes a tiny sentinel file. Cheaper than a real
-// download attempt and surfaces the same EACCES / read-only errors.
+// download attempt and surfaces the same EACCES / read-only errors. Closes
+// the file before unlinking — Windows refuses Remove on an open handle, so
+// skipping the Close error would leave a stale .veo3-write-probe behind.
 func probeWritable(dir string) error {
 	probe := filepath.Join(dir, ".veo3-write-probe")
 	f, err := os.Create(probe)
 	if err != nil {
 		return err
 	}
-	_ = f.Close()
+	if err := f.Close(); err != nil {
+		_ = os.Remove(probe)
+		return err
+	}
 	return os.Remove(probe)
 }
 

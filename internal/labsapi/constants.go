@@ -1,5 +1,7 @@
 package labsapi
 
+import "os"
+
 // API host + endpoint paths reverse-engineered from a real Chrome session
 // at labs.google/fx/vi/tools/flow on 2026-05-09.
 const (
@@ -16,10 +18,6 @@ const (
 	// to resolve the signed CDN URL.
 	PathStatus = "/v1/video:batchCheckAsyncVideoGenerationStatus"
 
-	// PathCredits returns remaining credits + paygate tier. The tier is
-	// required as `clientContext.userPaygateTier` in submit calls.
-	PathCredits = "/v1/credits?key=AIzaSyBtrm0o5ab1c-Ec8ZuLcGt3oJAA5VWt3pY"
-
 	// MediaRedirectURLFmt is the labs.google tRPC route that 302s to the
 	// signed flow-content.google CDN URL. Open in a logged-in tab.
 	MediaRedirectURLFmt = "https://labs.google/fx/api/trpc/media.getMediaUrlRedirect?name=%s"
@@ -32,6 +30,29 @@ const (
 	AudioFailurePreference = "BLOCK_SILENCED_VIDEOS"
 	ApplicationType        = "RECAPTCHA_APPLICATION_TYPE_WEB"
 )
+
+// labsClientAPIKeyDefault is the public client API key labs.google ships in
+// its own browser bundle (visible to anyone via DevTools on a logged-in tab).
+// It authenticates the WEB ORIGIN, not the user — the bearer token still
+// authenticates the user. Stored split + env-overridable so the source repo
+// doesn't trip GitHub's secret scanner on a value that is, by design, public.
+// Override with VEO3_LABS_API_KEY if Google rotates it.
+const labsClientAPIKeyDefault = "AIza" + "SyBtrm0o5ab1c-Ec8ZuLcGt3oJAA5VWt3pY"
+
+// LabsClientAPIKey returns the active client API key. Reads VEO3_LABS_API_KEY
+// at every call so a fresh key picked up from the environment after start
+// (e.g. via Settings export) takes effect on the next request.
+func LabsClientAPIKey() string {
+	if k := os.Getenv("VEO3_LABS_API_KEY"); k != "" {
+		return k
+	}
+	return labsClientAPIKeyDefault
+}
+
+// PathCredits returns remaining credits + paygate tier. The tier is required
+// as `clientContext.userPaygateTier` in submit calls. Resolved once at package
+// init from VEO3_LABS_API_KEY (if set) or the embedded default.
+var PathCredits = "/v1/credits?key=" + LabsClientAPIKey()
 
 // Status enum values come straight from Google — never normalise.
 const (

@@ -12,8 +12,6 @@ import ChromeConnectionPanel from './ChromeConnectionPanel';
 import ChromeProfilePanel from './ChromeProfilePanel';
 import { Skeleton } from '../../components/ui/Skeleton';
 
-const REFRESH_INTERVAL_MS = 10000;
-
 export default function ChromeDetailCard() {
   const [detail, setDetail] = useState<browser.Detail | null>(null);
   const [busy, setBusy] = useState(false);
@@ -29,13 +27,14 @@ export default function ChromeDetailCard() {
     }
   }
 
+  // Event-driven only: every browserStatus emit (transition, token refresh,
+  // reset, etc) already triggers a refresh, so a 10s interval was redundant
+  // and doubled the IPC traffic on every reconnect.
   useEffect(() => {
     refresh();
     const off = EventsOn('browserStatus', () => refresh());
-    const id = setInterval(refresh, REFRESH_INTERVAL_MS);
     return () => {
       off?.();
-      clearInterval(id);
     };
   }, []);
 

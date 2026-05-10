@@ -20,18 +20,30 @@ export default function QueuePage() {
   const [cfg, setCfg] = useState<db.GenerationConfig>(fallbackCfg);
   const enqueue = useQueueStore((s) => s.enqueue);
   const loadInitial = useQueueStore((s) => s.loadInitial);
-  const loaded = useQueueStore((s) => s.loaded);
   const pushToast = useAppStore((s) => s.pushToast);
 
+  // Mount-only: GetSettings + loadInitial run exactly once. Listing `loaded`
+  // in deps used to fire the effect a second time when loadInitial flipped
+  // the flag, doubling the IPC call to GetSettings on every page open.
   useEffect(() => {
+    let cancelled = false;
     GetSettings()
-      .then((b) => setCfg({
-        ...b.defaultConfig,
-        outputDir: b.defaultConfig.outputDir || b.outputDir,
-      }))
+      .then((b) => {
+        if (cancelled) return;
+        setCfg({
+          ...b.defaultConfig,
+          outputDir: b.defaultConfig.outputDir || b.outputDir,
+        });
+      })
       .catch(() => {});
-    if (!loaded) loadInitial().catch(() => {});
-  }, [loaded, loadInitial]);
+    if (!useQueueStore.getState().loaded) {
+      loadInitial().catch(() => {});
+    }
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleEnqueue(prompts: string[]) {
     try {

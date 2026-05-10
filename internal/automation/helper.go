@@ -56,12 +56,22 @@ func (h *Helper) FillPrompt(p *rod.Page, text string) error {
 
 // ClickCreate clicks the visible bottom-row "Create" button. Filters by Y
 // position because the page renders multiple buttons with the same label.
+//
+// Two passes: first prefer any button at or below CreateButtonMinY (the
+// canonical 1080p layout). On HiDPI / 4K / scaled windows where every
+// candidate sits above that threshold, fall back to the bottom-most match.
+// This avoids silent fail on non-default display setups while still excluding
+// the sidebar's hidden duplicate when the layout is normal.
 func (h *Helper) ClickCreate(p *rod.Page) error {
-	// Some pages embed the label inside spans; query all buttons and read inner text.
 	btns, err := p.Elements("button")
 	if err != nil {
 		return err
 	}
+	type candidate struct {
+		btn *rod.Element
+		y   float64
+	}
+	var matches []candidate
 	for _, b := range btns {
 		txt, _ := b.Text()
 		if !strings.Contains(strings.TrimSpace(txt), CreateButtonText) {
@@ -78,8 +88,21 @@ func (h *Helper) ClickCreate(p *rod.Page) error {
 		if box.Y >= CreateButtonMinY {
 			return b.Click(proto.InputMouseButtonLeft, 1)
 		}
+		matches = append(matches, candidate{btn: b, y: box.Y})
 	}
-	return ErrCreateButtonNotFound
+	if len(matches) == 0 {
+		return ErrCreateButtonNotFound
+	}
+	// Fallback: bottom-most candidate. Only triggers when the entire viewport
+	// is shorter than CreateButtonMinY — a strong signal we're on a scaled
+	// display, not that we're on the wrong page.
+	bottom := matches[0]
+	for _, c := range matches[1:] {
+		if c.y > bottom.y {
+			bottom = c
+		}
+	}
+	return bottom.btn.Click(proto.InputMouseButtonLeft, 1)
 }
 
 // openSettings clicks the cog button and waits briefly for the menu to mount.

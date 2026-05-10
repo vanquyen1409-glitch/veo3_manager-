@@ -2,9 +2,11 @@ package queue
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"veo3-manager/internal/db"
+	"veo3-manager/internal/labsapi"
 )
 
 func TestNormalizeGenerationConfig(t *testing.T) {
@@ -114,11 +116,12 @@ func TestIsPollTimeout(t *testing.T) {
 		want bool
 	}{
 		{"nil error is not timeout", nil, false},
-		{"exact match from labsapi", errors.New("poll timeout after 5m0s"), true},
-		{"wrapped poll timeout matches", errors.New("submit: poll timeout after 10m0s: gave up"), true},
+		{"exact match from labsapi", fmt.Errorf("%w after 5m0s", labsapi.ErrPollTimeout), true},
+		{"wrapped poll timeout matches", fmt.Errorf("submit: %w after 10m0s: gave up", labsapi.ErrPollTimeout), true},
 		{"unrelated error", errors.New("network unreachable"), false},
 		{"context cancelled is NOT a poll timeout (must not be retried)", errors.New("context canceled"), false},
 		{"context deadline is NOT a poll timeout", errors.New("context deadline exceeded"), false},
+		{"plain string with 'poll timeout' substring is NOT a match (sentinel-only)", errors.New("poll timeout after 5m0s"), false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

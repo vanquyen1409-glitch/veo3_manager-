@@ -7,8 +7,11 @@ import { StartQueue, PauseQueue, ResumeQueue, StopQueue } from '../../../wailsjs
 export default function ControlBar() {
   const queueState = useAppStore((s) => s.queueState);
   const pushToast = useAppStore((s) => s.pushToast);
-  const tasks = useQueueStore((s) => s.tasks);
-  const pendingCount = Object.values(tasks).filter((t) => t.status === 'pending').length;
+  // Subscribe to a derived primitive — Zustand only re-renders when the
+  // count changes, instead of on every task event (which mutates the map).
+  const pendingCount = useQueueStore(
+    (s) => Object.values(s.tasks).filter((t) => t.status === 'pending').length,
+  );
 
   async function start() {
     try { await StartQueue(); }

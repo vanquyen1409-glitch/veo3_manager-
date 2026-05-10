@@ -70,11 +70,20 @@ func (s *Service) OpenSafeLogin(ctx context.Context) error {
 	s.transition(StatusNeedsLogin, "đăng nhập Gmail trong cửa sổ Chrome an toàn")
 
 	// Watch the process: when user closes the window, auto-reconnect via CDP
-	// so the UI flips to "ready" using the cookies just saved.
+	// so the UI flips to "ready" using the cookies just saved. The 800ms
+	// settle waits for Chrome's shutdown to fully release the profile lock,
+	// but bails early on app shutdown so we don't reconnect into a half-torn
+	// runtime.
 	go func(c *exec.Cmd, ctx context.Context) {
 		_ = c.Wait()
 		slog.Info("safe-login Chrome closed, auto-reconnecting via CDP")
-		time.Sleep(800 * time.Millisecond)
+		settle := time.NewTimer(800 * time.Millisecond)
+		defer settle.Stop()
+		select {
+		case <-ctx.Done():
+			return
+		case <-settle.C:
+		}
 		s.mu.Lock()
 		s.safeLoginCmd = nil
 		s.mu.Unlock()
@@ -108,7 +117,8 @@ func (s *Service) OpenLoginFlow(ctx context.Context) error {
 
 // startLoginPoll runs a background poller that flips status to ready as soon
 // as a token can be extracted. Idempotent — second call while one is already
-// running is a no-op.
+// running is a no-op. Listens on the long-lived Wails ctx so app shutdown
+// stops the poll instead of hammering a closed page for up to 5 minutes.
 func (s *Service) startLoginPoll() {
 	s.mu.Lock()
 	if s.polling {
@@ -116,7 +126,11 @@ func (s *Service) startLoginPoll() {
 		return
 	}
 	s.polling = true
+	bgCtx := s.wailsCtx
 	s.mu.Unlock()
+	if bgCtx == nil {
+		bgCtx = context.Background()
+	}
 
 	go func() {
 		defer func() {
@@ -125,8 +139,12 @@ func (s *Service) startLoginPoll() {
 			s.mu.Unlock()
 		}()
 
-		deadline := time.Now().Add(5 * time.Minute)
-		for time.Now().Before(deadline) {
+		deadline := time.NewTimer(5 * time.Minute)
+		defer deadline.Stop()
+		tick := time.NewTicker(3 * time.Second)
+		defer tick.Stop()
+
+		for {
 			s.mu.RLock()
 			page := s.page
 			s.mu.RUnlock()
@@ -139,7 +157,13 @@ func (s *Service) startLoginPoll() {
 				s.transition(StatusReady, "")
 				return
 			}
-			time.Sleep(3 * time.Second)
+			select {
+			case <-bgCtx.Done():
+				return
+			case <-deadline.C:
+				return
+			case <-tick.C:
+			}
 		}
 	}()
 }

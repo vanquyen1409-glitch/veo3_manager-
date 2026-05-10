@@ -2,9 +2,15 @@ package labsapi
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 )
+
+// ErrPollTimeout is returned by Wait when its deadline elapses before every
+// media reaches a terminal status. The queue worker uses errors.Is on this
+// to decide whether to extend the deadline and retry.
+var ErrPollTimeout = errors.New("poll timeout")
 
 // PollOnce sends a single batch status check.
 func (c *Client) PollOnce(ctx context.Context, refs []MediaRef) ([]FinalMedia, error) {
@@ -88,7 +94,7 @@ func (c *Client) Wait(ctx context.Context, refs []MediaRef, opts PollOptions) ([
 			return rows, nil
 		}
 		if time.Now().After(deadline) {
-			return nil, fmt.Errorf("poll timeout after %s", opts.Timeout)
+			return nil, fmt.Errorf("%w after %s", ErrPollTimeout, opts.Timeout)
 		}
 
 		t := time.NewTimer(opts.Interval)

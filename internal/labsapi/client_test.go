@@ -387,8 +387,8 @@ func TestWait_TimeoutReturnsExplicitError(t *testing.T) {
 	if err == nil {
 		t.Fatal("Wait should time out")
 	}
-	if !strings.Contains(err.Error(), "poll timeout") {
-		t.Errorf("err = %v, want 'poll timeout' substring (worker uses isPollTimeout to detect)", err)
+	if !errors.Is(err, ErrPollTimeout) {
+		t.Errorf("err = %v, want ErrPollTimeout (worker uses errors.Is to detect)", err)
 	}
 }
 

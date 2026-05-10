@@ -71,9 +71,11 @@ func (s *Service) Bind(ctx context.Context, emit EmitFn) {
 
 // Snapshot returns a copy of the current state for the UI.
 func (s *Service) Snapshot() Snapshot {
+	// cfgFn hits SettingsRepo (DB-backed). Calling it under RLock would
+	// stall every concurrent reader on a slow DB query; resolve it first.
+	cfg := s.cfgFn()
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	cfg := s.cfgFn()
 	snap := Snapshot{
 		Status:      s.status,
 		Message:     s.statusMsg,
@@ -202,6 +204,15 @@ func (s *Service) Stop() {
 // reconnect afterwards. Refuses to run when we don't own the browser to avoid
 // nuking another Chrome's profile while it's open.
 func (s *Service) ResetProfile() error {
+	// Snapshot ownership BEFORE Stop() — Stop unconditionally clears weOwn,
+	// so without this read we'd lose the chance to refuse the wipe.
+	s.mu.RLock()
+	weOwn := s.weOwn
+	connected := s.browser != nil
+	s.mu.RUnlock()
+	if connected && !weOwn {
+		return errors.New("attached to external Chrome — close it first to avoid wiping its profile")
+	}
 	s.Stop()
 	cfg := s.cfgFn()
 	if cfg.UserDataDir == "" {

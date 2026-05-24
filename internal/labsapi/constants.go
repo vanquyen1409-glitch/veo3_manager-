@@ -1,6 +1,10 @@
 package labsapi
 
-import "os"
+import (
+	"os"
+
+	"veo3-manager/internal/db"
+)
 
 // API host + endpoint paths reverse-engineered from a real Chrome session
 // at labs.google/fx/vi/tools/flow on 2026-05-09.
@@ -22,9 +26,11 @@ const (
 	// signed flow-content.google CDN URL. Open in a logged-in tab.
 	MediaRedirectURLFmt = "https://labs.google/fx/api/trpc/media.getMediaUrlRedirect?name=%s"
 
-	// DefaultModel is the family id used when none is selected. The concrete
-	// videoModelKey is derived via VideoModelKeyFor.
-	DefaultModel = "veo_3_1_fast"
+	// DefaultModel is the family id used when none is selected. Aliased from
+	// db.DefaultModel so the queue worker's normalization and labsapi's own
+	// defensive normalization can never disagree on the fallback family. The
+	// concrete videoModelKey is derived via VideoModelKeyFor.
+	DefaultModel = db.DefaultModel
 
 	// Tool / context constants observed in the real submit body.
 	ToolName               = "PINHOLE"

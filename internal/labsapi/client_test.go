@@ -27,6 +27,7 @@ type fakePage struct {
 	fetchByPath      map[string][]fetchResult // path -> sequence of results
 	fetchPerPathIdx  map[string]int           // per-path call counter (mu-protected)
 	fetchPathHistory []string
+	submitBodies     []string                 // raw JSON bodies POSTed to PathSubmit
 	mu               struct{}                 // unused; tests are single-goroutine
 }
 
@@ -35,7 +36,7 @@ type fetchResult struct {
 	err  error
 }
 
-func (f *fakePage) PageFetch(_ context.Context, _, fullURL, _, _ string) ([]byte, error) {
+func (f *fakePage) PageFetch(_ context.Context, _, fullURL, _, body string) ([]byte, error) {
 	f.fetchCalls.Add(1)
 	// Strip query string for matching against path constants.
 	path := fullURL
@@ -44,6 +45,9 @@ func (f *fakePage) PageFetch(_ context.Context, _, fullURL, _, _ string) ([]byte
 	}
 	path = strings.TrimPrefix(path, BaseURL)
 	f.fetchPathHistory = append(f.fetchPathHistory, path)
+	if path == PathSubmit {
+		f.submitBodies = append(f.submitBodies, body)
+	}
 
 	results, ok := f.fetchByPath[path]
 	if !ok || len(results) == 0 {
@@ -133,6 +137,58 @@ func TestSubmit_HappyPath(t *testing.T) {
 	}
 	if page.ensureViewCalls.Load() < 1 {
 		t.Errorf("EnsureProjectView called %d times, want >=1", page.ensureViewCalls.Load())
+	}
+}
+
+// TestSubmit_ResolvesVideoModelKey verifies the family id in SubmitConfig is
+// resolved to the correct per-aspect / per-duration videoModelKey IN the POST
+// body — the resolution happens inside Submit before submitOne, so a regression
+// in the switch would otherwise go uncaught by the isolated VideoModelKeyFor
+// unit test.
+func TestSubmit_ResolvesVideoModelKey(t *testing.T) {
+	cases := []struct {
+		name    string
+		cfg     SubmitConfig
+		wantKey string
+	}{
+		{"quality portrait", SubmitConfig{Model: "veo_3_1_quality", AspectRatio: "9:16", OutputCount: 1, Seeds: []int64{1}}, "veo_3_1_t2v_portrait"},
+		{"quality landscape", SubmitConfig{Model: "veo_3_1_quality", AspectRatio: "16:9", OutputCount: 1, Seeds: []int64{1}}, "veo_3_1_t2v"},
+		{"lite both", SubmitConfig{Model: "veo_3_1_lite", AspectRatio: "9:16", OutputCount: 1, Seeds: []int64{1}}, "veo_3_1_t2v_lite"},
+		{"omni 6s", SubmitConfig{Model: "abra", AspectRatio: "16:9", OutputCount: 1, OmniDurationSec: 6, Seeds: []int64{1}}, "abra_t2v_6s"},
+		{"omni zero duration clamps to 8s", SubmitConfig{Model: "abra", AspectRatio: "16:9", OutputCount: 1, OmniDurationSec: 0, Seeds: []int64{1}}, "abra_t2v_8s"},
+		{"unknown family falls back to fast landscape", SubmitConfig{Model: "garbage", AspectRatio: "16:9", OutputCount: 1, Seeds: []int64{1}}, "veo_3_1_t2v_fast"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			page := &fakePage{
+				token:     "tok",
+				projectID: "proj-1",
+				fetchByPath: map[string][]fetchResult{
+					PathCredits[:strings.Index(PathCredits, "?")]: {{
+						body: jsonBody(t, map[string]any{"credits": 100, "userPaygateTier": "PAYGATE_TIER_ONE"}),
+					}},
+					PathSubmit: {{body: jsonBody(t, map[string]any{"media": []map[string]any{{"name": "m1", "projectId": "proj-1"}}})}},
+				},
+			}
+			c := NewClient(page, nil)
+			if _, err := c.Submit(context.Background(), "a cat surfing", tc.cfg); err != nil {
+				t.Fatalf("Submit: %v", err)
+			}
+			if len(page.submitBodies) != 1 {
+				t.Fatalf("captured %d submit bodies, want 1", len(page.submitBodies))
+			}
+			var got struct {
+				Requests []struct {
+					VideoModelKey string `json:"videoModelKey"`
+				} `json:"requests"`
+			}
+			if err := json.Unmarshal([]byte(page.submitBodies[0]), &got); err != nil {
+				t.Fatalf("decode submit body: %v\nbody: %s", err, page.submitBodies[0])
+			}
+			if len(got.Requests) != 1 || got.Requests[0].VideoModelKey != tc.wantKey {
+				t.Errorf("videoModelKey = %q, want %q", got.Requests[0].VideoModelKey, tc.wantKey)
+			}
+		})
 	}
 }
 

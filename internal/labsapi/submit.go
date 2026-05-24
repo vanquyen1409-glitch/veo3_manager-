@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"veo3-manager/internal/db"
+
 	"github.com/google/uuid"
 )
 
@@ -22,9 +24,12 @@ func (c *Client) Submit(ctx context.Context, prompt string, cfg SubmitConfig) ([
 	if cfg.OutputCount > 4 {
 		cfg.OutputCount = 4
 	}
-	if cfg.Model == "" {
-		cfg.Model = DefaultModel
-	}
+	// Defensive normalization for callers that bypass the queue worker (which
+	// also normalizes). Routing both through the same db helpers keeps a single
+	// source of truth so the model family + Omni duration can't diverge between
+	// the two paths.
+	cfg.Model = db.NormalizeModelFamily(cfg.Model)
+	cfg.OmniDurationSec = db.NormalizeOmniDuration(cfg.OmniDurationSec)
 	if cfg.AspectRatio == "" {
 		cfg.AspectRatio = "16:9"
 	}
@@ -115,11 +120,13 @@ func (c *Client) submitOne(
 		"useV2ModelConfig": true,
 	}
 
-	// Debug: dump exact JSON about to POST. Useful when verifying a newly
+	// Dump exact JSON about to POST at DEBUG — useful when verifying a newly
 	// enabled model family resolves to the right videoModelKey for the chosen
-	// aspect ratio (e.g. Quality portrait → veo_3_1_t2v_portrait).
+	// aspect ratio (e.g. Quality portrait → veo_3_1_t2v_portrait). Kept at
+	// DEBUG (not INFO) so production logs aren't bloated with full prompt text
+	// on every submit.
 	if reqDump, err := json.MarshalIndent(body, "", "  "); err == nil {
-		c.log.Info("labsapi.submit request",
+		c.log.Debug("labsapi.submit request",
 			"projectId", projectID,
 			"batchId", batchID,
 			"seed", seed,
@@ -139,7 +146,7 @@ func (c *Client) submitOne(
 		c.log.Warn("labsapi.submit response error", "model", model, "err", err.Error())
 		return "", err
 	}
-	c.log.Info("labsapi.submit response ok", "model", model, "body", string(raw))
+	c.log.Debug("labsapi.submit response ok", "model", model, "body", string(raw))
 
 	var out struct {
 		Media []struct {

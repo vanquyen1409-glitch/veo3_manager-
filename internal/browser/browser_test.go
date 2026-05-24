@@ -150,6 +150,61 @@ func TestRealisticUA_LooksLikeRealChrome(t *testing.T) {
 	}
 }
 
+func TestDetectChromeMajor_ReadsVersionedFolder(t *testing.T) {
+	// Lay out a fake Chrome install: …\Application\<version>\ next to chrome.exe.
+	app := filepath.Join(t.TempDir(), "Application")
+	if err := os.MkdirAll(filepath.Join(app, "148.0.7778.179"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// An older version dir co-exists after an update — we must pick the highest.
+	if err := os.MkdirAll(filepath.Join(app, "140.0.7000.10"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// Noise dirs that must be ignored.
+	if err := os.MkdirAll(filepath.Join(app, "SetupMetrics"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	chromePath := filepath.Join(app, "chrome.exe")
+	if err := os.WriteFile(chromePath, []byte("stub"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := detectChromeMajor(chromePath); got != "148" {
+		t.Errorf("detectChromeMajor = %q, want 148 (highest version dir)", got)
+	}
+}
+
+func TestRealisticUA_MatchesInstalledVersion(t *testing.T) {
+	app := filepath.Join(t.TempDir(), "Application")
+	if err := os.MkdirAll(filepath.Join(app, "148.0.7778.179"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	chromePath := filepath.Join(app, "chrome.exe")
+	if err := os.WriteFile(chromePath, []byte("stub"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	ua := realisticUA(chromePath)
+	if !strings.Contains(ua, "Chrome/148.0.0.0") {
+		t.Errorf("realisticUA = %q, want it to track installed Chrome 148", ua)
+	}
+	// The bug we fixed: a UA frozen at 130 while the real Chrome is far newer.
+	if strings.Contains(ua, "Chrome/130") {
+		t.Errorf("realisticUA must not regress to the stale hard-coded 130: %q", ua)
+	}
+}
+
+func TestRealisticUA_FallsBackWhenUndetectable(t *testing.T) {
+	// No versioned folder → must fall back to the constant, never empty.
+	chromePath := filepath.Join(t.TempDir(), "chrome.exe")
+	if err := os.WriteFile(chromePath, []byte("stub"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if ua := realisticUA(chromePath); ua != RealisticUA {
+		t.Errorf("realisticUA fallback = %q, want RealisticUA constant", ua)
+	}
+}
+
 func TestErrors_AllSentinelsHaveDistinctMessages(t *testing.T) {
 	// Tests are the cheapest way to catch a copy-paste bug where two
 	// sentinels share the same message and `errors.Is` comparisons silently

@@ -30,11 +30,19 @@ func (s *Service) OpenSafeLogin(ctx context.Context) error {
 		return fmt.Errorf("userDataDir not configured")
 	}
 
-	// Drop any existing CDP-driven Chrome we own — only one Chrome process
-	// may hold the profile lock.
+	// Drop ANY Chrome currently bound to our profile dir — only one Chrome
+	// process may hold the profile lock. We close it even when weOwn=false
+	// (i.e. we merely reused a Chrome already running on the debug port):
+	// that Chrome is still on our dedicated chromedata profile, and if we
+	// leave it open, Chrome's single-instance handling forwards the
+	// safe-login URL into THAT (CDP-attached) window and the new chrome.exe
+	// exits immediately — so the clean, automation-free window never opens
+	// and Google keeps showing "browser may not be secure".
 	s.mu.Lock()
-	if s.weOwn && s.browser != nil {
+	closed := false
+	if s.browser != nil {
 		_ = s.browser.Close()
+		closed = true
 	}
 	s.browser = nil
 	s.page = nil
@@ -49,6 +57,13 @@ func (s *Service) OpenSafeLogin(ctx context.Context) error {
 
 	if prev != nil && prev.Process != nil {
 		_ = prev.Process.Kill()
+	}
+
+	// Give Chrome a moment to fully exit and release the user-data-dir lock
+	// before we spawn the clean window; otherwise the new chrome.exe sees the
+	// lock still held and forwards into the dying instance.
+	if closed {
+		time.Sleep(700 * time.Millisecond)
 	}
 
 	cmd, err := launchSafeLogin(chromePath, userDataDir, "https://accounts.google.com/")

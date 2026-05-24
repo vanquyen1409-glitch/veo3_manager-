@@ -17,7 +17,7 @@ var BypassFlags = []string{
 	"--disable-blink-features=AutomationControlled",
 	"--disable-features=AutomationControlled,IsolateOrigins,site-per-process,Translate,OptimizationGuideModelDownloading",
 	"--enable-features=NetworkService,NetworkServiceInProcess",
-	"--user-agent=Mozilla/5.0 ... Chrome/130.0.0.0 (real UA, no HeadlessChrome)",
+	"--user-agent=<auto: matches your installed Chrome version, no HeadlessChrome>",
 	"--user-data-dir=<persistent profile, cookies survive restarts>",
 	"--lang=en-US,en;q=0.9",
 	"--password-store=basic",
@@ -25,7 +25,8 @@ var BypassFlags = []string{
 	"--no-first-run",
 	"--no-default-browser-check",
 	"--disable-default-apps",
-	"--remote-allow-origins=*",
+	"--start-maximized (Flow/Veo UI fills the screen, also re-asserted via CDP)",
+	"--remote-allow-origins=http://127.0.0.1 (block cross-origin CDP hijack)",
 }
 
 // StealthPatches mirrors what we inject via Page.EvalOnNewDocument BEFORE any

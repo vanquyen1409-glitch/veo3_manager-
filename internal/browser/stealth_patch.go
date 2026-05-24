@@ -2,6 +2,7 @@ package browser
 
 import (
 	"context"
+	"strings"
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
@@ -100,11 +101,22 @@ const stealthScript = `
 // ctx controls the lifetime of the background TargetCreated listener; cancel
 // it (Service.Stop) to terminate the goroutine cleanly. Without ctx-driven
 // cancellation, repeated connect/disconnect cycles leak one goroutine each.
-func applyBrowserStealth(ctx context.Context, b *rod.Browser) error {
+//
+// fallbackUA is used only when the browser does not report a usable UA of its
+// own (see below); pass realisticUA(chromePath) so it tracks the install.
+func applyBrowserStealth(ctx context.Context, b *rod.Browser, fallbackUA string) error {
+	// Prefer the browser's OWN reported UA — it is the genuine, current Chrome
+	// string and is guaranteed to match the safe-login window. Only fall back
+	// to the detected/static UA if it is missing or still leaks "Headless".
+	ua := fallbackUA
+	if v, err := b.Version(); err == nil && v.UserAgent != "" && !strings.Contains(v.UserAgent, "Headless") {
+		ua = v.UserAgent
+	}
+
 	// Override UA at the network layer so every request — including the
 	// initial Google account fetch — uses a stock Chrome UA.
 	uaOverride := proto.NetworkSetUserAgentOverride{
-		UserAgent:      RealisticUA,
+		UserAgent:      ua,
 		AcceptLanguage: "en-US,en;q=0.9",
 		Platform:       "Win32",
 	}

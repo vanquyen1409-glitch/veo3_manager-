@@ -61,6 +61,11 @@ func (s *Service) Ensure(ctx context.Context) (Snapshot, error) {
 	}
 	slog.Info("chrome connected", "weOwn", weOwn, "pid", pid, "ws", wsURL)
 
+	// Disable rod's default device emulation (LaptopWithMDPIScreen) BEFORE any
+	// page is created. Otherwise rod pins every new page to a fixed ~1280px
+	// viewport and the Flow UI renders small with black bars on the right.
+	br.NoDefaultDevice()
+
 	// Build a fresh cancel ctx for this connect cycle's stealth listener.
 	// If a previous listener is still alive (shouldn't happen because Stop
 	// cancels, but defensively), cancel it before installing the new one.
@@ -80,7 +85,7 @@ func (s *Service) Ensure(ctx context.Context) (Snapshot, error) {
 	// Apply browser-wide stealth + UA override BEFORE any page navigates.
 	// Guards against Google's account login screen rejecting us with
 	// "This browser or app may not be secure".
-	if err := applyBrowserStealth(stealthCtx, br); err != nil {
+	if err := applyBrowserStealth(stealthCtx, br, realisticUA(chromePath)); err != nil {
 		slog.Warn("applyBrowserStealth failed (continuing)", "err", err)
 	}
 
@@ -91,6 +96,12 @@ func (s *Service) Ensure(ctx context.Context) (Snapshot, error) {
 		return s.Snapshot(), err
 	}
 	slog.Info("labs tab ready")
+
+	// Maximize the window so the Flow/Veo UI fills the screen. Covers both the
+	// fresh-launch and reuse paths (the launch flag only helps the former).
+	if err := maximizeWindow(page); err != nil {
+		slog.Warn("maximizeWindow failed (continuing)", "err", err)
+	}
 
 	if err := s.ensureProjectView(page); err != nil {
 		slog.Warn("ensureProjectView failed (continuing)", "err", err)

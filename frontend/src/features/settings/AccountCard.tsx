@@ -8,6 +8,7 @@ import {
   Trash2,
   CheckCircle2,
   AlertCircle,
+  ChevronDown,
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -38,7 +39,7 @@ const stateMeta: Record<
     bg: 'bg-amber-500/15 border-amber-400/60 dark:border-amber-700/50',
     icon: AlertCircle,
     title: 'Cần đăng nhập Google',
-    help: 'Nếu Gmail báo "This browser may not be secure" — dùng nút "Đăng nhập an toàn" bên dưới (mở Chrome KHÔNG có CDP, Google sẽ không chặn).',
+    help: 'Làm theo 4 bước bên dưới để đăng nhập an toàn, Google sẽ không chặn.',
   },
   connecting: {
     tone: 'text-amber-600 dark:text-amber-400',
@@ -52,7 +53,7 @@ const stateMeta: Record<
     bg: 'bg-red-500/15 border-red-400/60 dark:border-red-700/50',
     icon: AlertCircle,
     title: 'Chưa kết nối Chrome',
-    help: 'Nhấn "Đăng nhập an toàn" để khởi động Chrome với profile riêng (Google không phát hiện automation).',
+    help: 'Làm theo 4 bước bên dưới để đăng nhập an toàn, Google sẽ không chặn.',
   },
   error: {
     tone: 'text-red-600 dark:text-red-400',
@@ -63,14 +64,23 @@ const stateMeta: Record<
   },
 };
 
+const STEPS = [
+  'Bấm nút “Đăng nhập an toàn” — app mở cửa sổ Chrome thật.',
+  'Đăng nhập Gmail như bình thường trong cửa sổ đó.',
+  'Đăng nhập xong thì đóng cửa sổ Chrome lại.',
+  'App tự kết nối lại bằng phiên vừa lưu — xong!',
+];
+
 export default function AccountCard() {
   const browser = useAppStore((s) => s.browser);
   const pushToast = useAppStore((s) => s.pushToast);
   const [busy, setBusy] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const status = browser?.status ?? 'disconnected';
   const meta = stateMeta[status] ?? stateMeta.disconnected;
   const Icon = meta.icon;
+  const ready = status === 'ready';
 
   async function safeLogin() {
     setBusy(true);
@@ -141,6 +151,7 @@ export default function AccountCard() {
 
   return (
     <Card>
+      {/* Status header */}
       <div className="flex items-start gap-4">
         <span className={cn('flex h-12 w-12 flex-none items-center justify-center rounded-xl border', meta.bg)}>
           <ChromeIcon size={22} className={meta.tone} />
@@ -151,7 +162,7 @@ export default function AccountCard() {
             <h2 className="text-strong text-base font-semibold">{meta.title}</h2>
           </div>
           <p className="text-muted mt-1 text-sm">{meta.help}</p>
-          {browser?.tokenAgeMs && status === 'ready' && (
+          {browser?.tokenAgeMs && ready && (
             <p className="mt-2 text-xs text-subtle">
               Token cách đây {formatDuration(browser.tokenAgeMs)} · cookies tự động lưu
             </p>
@@ -159,39 +170,70 @@ export default function AccountCard() {
         </div>
       </div>
 
-      {status !== 'ready' && (
-        <div className="mt-4 rounded-md border border-emerald-400/60 dark:border-emerald-700/40 bg-emerald-500/10 p-3 text-xs text-emerald-800 dark:text-emerald-200">
-          <b>💡 Khuyên dùng:</b> Bấm <b>"Đăng nhập an toàn"</b> nếu Google chặn login với cảnh báo
-          <i> "This browser or app may not be secure"</i>. App sẽ mở Chrome chuẩn (không có CDP),
-          bạn login Gmail xong đóng cửa sổ — cookies sẽ được lưu vào profile và app tự kết nối lại.
-        </div>
+      {!ready && (
+        <>
+          {/* 4-step visual guide */}
+          <ol className="mt-4 space-y-2.5 rounded-lg border border-emerald-400/50 dark:border-emerald-700/40 bg-emerald-500/[0.07] p-4">
+            {STEPS.map((text, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm text-emerald-900 dark:text-emerald-100">
+                <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-emerald-600 text-[11px] font-bold text-white">
+                  {i + 1}
+                </span>
+                <span className="leading-5">{text}</span>
+              </li>
+            ))}
+          </ol>
+
+          {/* Primary action */}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Button size="lg" variant="success" onClick={safeLogin} disabled={busy}>
+              <ShieldCheck size={16} /> Đăng nhập an toàn
+            </Button>
+            <Button size="lg" variant="ghost" onClick={refresh} disabled={busy}>
+              <RefreshCw size={14} /> Kiểm tra lại
+            </Button>
+          </div>
+        </>
       )}
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        {status !== 'ready' ? (
-          <>
-            <Button size="md" variant="success" onClick={safeLogin} disabled={busy}>
-              <ShieldCheck size={14} /> Đăng nhập an toàn (khuyên dùng)
-            </Button>
-            <Button size="md" variant="secondary" onClick={normalLogin} disabled={busy}>
-              <LogIn size={14} /> Mở Chrome CDP
-            </Button>
-          </>
-        ) : (
+      {ready && (
+        <div className="mt-4 flex flex-wrap gap-2">
           <Button size="md" variant="secondary" onClick={normalLogin} disabled={busy}>
             <ChromeIcon size={14} /> Mở Chrome
           </Button>
+          <Button size="md" variant="ghost" onClick={refresh} disabled={busy}>
+            <RefreshCw size={14} /> Kiểm tra lại
+          </Button>
+        </div>
+      )}
+
+      {/* Advanced — tucked away so it can't be clicked by mistake */}
+      <div className="mt-4 border-t border-[var(--border)] pt-3">
+        <button
+          type="button"
+          onClick={() => setShowAdvanced((v) => !v)}
+          className="flex items-center gap-1.5 text-xs font-medium text-subtle transition-colors hover:text-soft"
+        >
+          <ChevronDown size={14} className={cn('transition-transform', showAdvanced && 'rotate-180')} />
+          Tùy chọn nâng cao
+        </button>
+
+        {showAdvanced && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {!ready && (
+              <Button size="sm" variant="secondary" onClick={normalLogin} disabled={busy}>
+                <LogIn size={14} /> Mở Chrome CDP
+              </Button>
+            )}
+            <Button size="sm" variant="ghost" onClick={() => OpenProfileFolder().catch(() => {})}>
+              <FolderOpen size={14} /> Mở thư mục profile
+            </Button>
+            <div className="flex-1" />
+            <Button size="sm" variant="danger" onClick={reset} disabled={busy}>
+              <Trash2 size={14} /> Xóa profile
+            </Button>
+          </div>
         )}
-        <Button size="md" variant="ghost" onClick={refresh} disabled={busy}>
-          <RefreshCw size={14} /> Kiểm tra lại
-        </Button>
-        <Button size="md" variant="ghost" onClick={() => OpenProfileFolder().catch(() => {})}>
-          <FolderOpen size={14} /> Mở thư mục profile
-        </Button>
-        <div className="flex-1" />
-        <Button size="md" variant="danger" onClick={reset} disabled={busy}>
-          <Trash2 size={14} /> Xóa profile
-        </Button>
       </div>
     </Card>
   );

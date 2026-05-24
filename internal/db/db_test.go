@@ -314,7 +314,7 @@ func TestSettingsBundle_RoundTrip(t *testing.T) {
 		OutputDir:       "C:/out",
 		ChromeDebugPort: 9222,
 		DefaultConfig: GenerationConfig{
-			Model: "veo_3_1_t2v_fast", AspectRatio: "9:16", OutputCount: 2, SeedBase: 100, OutputDir: "C:/out",
+			Model: ModelQuality, AspectRatio: "9:16", OutputCount: 2, OmniDurationSec: 8, SeedBase: 100, OutputDir: "C:/out",
 		},
 		PollIntervalMs: 5000,
 		PollTimeoutMs:  600000,

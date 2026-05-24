@@ -22,8 +22,9 @@ const (
 	// signed flow-content.google CDN URL. Open in a logged-in tab.
 	MediaRedirectURLFmt = "https://labs.google/fx/api/trpc/media.getMediaUrlRedirect?name=%s"
 
-	// DefaultModel is the only video model currently confirmed working.
-	DefaultModel = "veo_3_1_t2v_fast"
+	// DefaultModel is the family id used when none is selected. The concrete
+	// videoModelKey is derived via VideoModelKeyFor.
+	DefaultModel = "veo_3_1_fast"
 
 	// Tool / context constants observed in the real submit body.
 	ToolName               = "PINHOLE"
@@ -61,6 +62,44 @@ const (
 	StatusSuccessfulStr = "MEDIA_GENERATION_STATUS_SUCCESSFUL"
 	StatusFailedStr     = "MEDIA_GENERATION_STATUS_FAILED"
 )
+
+// VideoModelKeyFor maps a UI model family + aspect ratio (+ Omni clip length)
+// to the concrete `videoModelKey` the submit body requires. Values were
+// confirmed 2026-05-24 from the live Flow flow.projectInitialData
+// videoModelFamilies response; Fast's derived key matched the app's
+// already-working "veo_3_1_t2v_fast", validating the rest.
+//
+// Fast & Quality ship separate landscape/portrait keys; Lite & Omni use one
+// key for both orientations. Omni (`abra`) encodes the clip length in its key.
+// Any unknown family falls back to Fast landscape — the proven path.
+func VideoModelKeyFor(family, aspect string, omniSec int) string {
+	portrait := aspect == "9:16"
+	switch family {
+	case "veo_3_1_lite":
+		return "veo_3_1_t2v_lite"
+	case "veo_3_1_quality":
+		if portrait {
+			return "veo_3_1_t2v_portrait"
+		}
+		return "veo_3_1_t2v"
+	case "abra":
+		switch omniSec {
+		case 4:
+			return "abra_t2v_4s"
+		case 6:
+			return "abra_t2v_6s"
+		case 10:
+			return "abra_t2v_10s"
+		default:
+			return "abra_t2v_8s"
+		}
+	default: // "veo_3_1_fast" + anything unknown
+		if portrait {
+			return "veo_3_1_t2v_fast_portrait"
+		}
+		return "veo_3_1_t2v_fast"
+	}
+}
 
 // AspectRatioFor maps a UI label ("16:9") to the API enum.
 func AspectRatioFor(ratio string) string {

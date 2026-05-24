@@ -2,6 +2,7 @@ package labsapi
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -48,6 +49,9 @@ func (c *Client) Submit(ctx context.Context, prompt string, cfg SubmitConfig) ([
 	batchID := uuid.NewString()
 	sessionID := fmt.Sprintf(";%d", time.Now().UnixMilli())
 	aspectEnum := AspectRatioFor(cfg.AspectRatio)
+	// Resolve the family id (cfg.Model) to the concrete videoModelKey the API
+	// expects for this aspect ratio / Omni clip length.
+	modelKey := VideoModelKeyFor(cfg.Model, cfg.AspectRatio, cfg.OmniDurationSec)
 
 	seeds := cfg.Seeds
 	if len(seeds) < cfg.OutputCount {
@@ -63,7 +67,7 @@ func (c *Client) Submit(ctx context.Context, prompt string, cfg SubmitConfig) ([
 		if err != nil {
 			return refs, fmt.Errorf("recaptcha (output %d): %w", i, err)
 		}
-		mid, err := c.submitOne(ctx, projectID, batchID, sessionID, tier, recap, prompt, aspectEnum, cfg.Model, seeds[i])
+		mid, err := c.submitOne(ctx, projectID, batchID, sessionID, tier, recap, prompt, aspectEnum, modelKey, seeds[i])
 		if err != nil {
 			return refs, fmt.Errorf("submit (output %d): %w", i, err)
 		}
@@ -81,6 +85,17 @@ func (c *Client) submitOne(
 	projectID, batchID, sessionID, tier, recap, prompt, aspectEnum, model string,
 	seed int64,
 ) (string, error) {
+	request := map[string]any{
+		"aspectRatio": aspectEnum,
+		"textInput": map[string]any{
+			"structuredPrompt": map[string]any{
+				"parts": []map[string]any{{"text": prompt}},
+			},
+		},
+		"videoModelKey": model,
+		"metadata":      map[string]any{},
+		"seed":          seed,
+	}
 	body := map[string]any{
 		"mediaGenerationContext": map[string]any{
 			"batchId":                batchID,
@@ -96,19 +111,35 @@ func (c *Client) submitOne(
 				"applicationType": ApplicationType,
 			},
 		},
-		"requests": []map[string]any{{
-			"aspectRatio": aspectEnum,
-			"textInput": map[string]any{
-				"structuredPrompt": map[string]any{
-					"parts": []map[string]any{{"text": prompt}},
-				},
-			},
-			"videoModelKey": model,
-			"metadata":      map[string]any{},
-			"seed":          seed,
-		}},
+		"requests":         []map[string]any{request},
 		"useV2ModelConfig": true,
 	}
+
+	// Debug: dump exact JSON about to POST. Useful when verifying a newly
+	// enabled model family resolves to the right videoModelKey for the chosen
+	// aspect ratio (e.g. Quality portrait → veo_3_1_t2v_portrait).
+	if reqDump, err := json.MarshalIndent(body, "", "  "); err == nil {
+		c.log.Info("labsapi.submit request",
+			"projectId", projectID,
+			"batchId", batchID,
+			"seed", seed,
+			"videoModelKey", model,
+			"aspectRatio", aspectEnum,
+			"body", string(reqDump),
+		)
+	}
+
+	var raw json.RawMessage
+	err := c.fetchJSON(ctx, "POST", PathSubmit, body, &raw)
+	if err != nil {
+		// fetchJSON's error string already contains "status %d: %s" for
+		// non-2xx (see browser/page_fetch.go). Log verbatim so the exact
+		// Labs reply (e.g. INVALID_ARGUMENT on an unknown model key) is
+		// visible in the dev console + history task error field.
+		c.log.Warn("labsapi.submit response error", "model", model, "err", err.Error())
+		return "", err
+	}
+	c.log.Info("labsapi.submit response ok", "model", model, "body", string(raw))
 
 	var out struct {
 		Media []struct {
@@ -116,8 +147,8 @@ func (c *Client) submitOne(
 			ProjectID string `json:"projectId"`
 		} `json:"media"`
 	}
-	if err := c.fetchJSON(ctx, "POST", PathSubmit, body, &out); err != nil {
-		return "", err
+	if err := json.Unmarshal(raw, &out); err != nil {
+		return "", fmt.Errorf("decode submit: %w (body: %s)", err, snip(raw))
 	}
 	if len(out.Media) == 0 {
 		return "", fmt.Errorf("submit returned no media")

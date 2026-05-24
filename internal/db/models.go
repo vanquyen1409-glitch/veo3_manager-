@@ -17,11 +17,56 @@ const (
 // Stored as JSON in tasks.config_json so future setting tweaks don't mutate
 // already-enqueued tasks.
 type GenerationConfig struct {
+	// Model is a video model FAMILY id (not the raw videoModelKey). The
+	// concrete key is resolved at submit time from (family, aspectRatio,
+	// OmniDurationSec) because Fast & Quality use different keys for
+	// landscape vs portrait and Omni Flash encodes clip length in its key.
+	// See db.NormalizeModelFamily + labsapi.VideoModelKeyFor.
 	Model       string `json:"model"`
 	AspectRatio string `json:"aspectRatio"`
 	OutputCount int    `json:"outputCount"`
-	SeedBase    int64  `json:"seedBase"`
-	OutputDir   string `json:"outputDir"`
+	// OmniDurationSec is the clip length in seconds for the Omni Flash
+	// (`abra`) family: 4 | 6 | 8 | 10. Ignored by the other families, which
+	// only ship a fixed 8 s clip. Defaults to 8.
+	OmniDurationSec int   `json:"omniDurationSec"`
+	SeedBase        int64 `json:"seedBase"`
+	OutputDir       string `json:"outputDir"`
+}
+
+// Video model FAMILY ids stored in GenerationConfig.Model. These are the
+// stable family ids from the Flow flow.projectInitialData videoModelFamilies
+// response — NOT the per-aspect videoModelKey sent to the API (that's derived
+// via labsapi.VideoModelKeyFor).
+const (
+	ModelFast    = "veo_3_1_fast"
+	ModelLite    = "veo_3_1_lite"
+	ModelQuality = "veo_3_1_quality"
+	ModelOmni    = "abra"
+	DefaultModel = ModelFast
+)
+
+// NormalizeModelFamily coerces any stored model value to a known family id.
+// This also migrates legacy values that used the raw videoModelKey
+// ("veo_3_1_t2v_fast", "..._ultra"), empty strings, and the old "<TBD:..."
+// placeholders — all fall back to the default Fast family.
+func NormalizeModelFamily(m string) string {
+	switch m {
+	case ModelFast, ModelLite, ModelQuality, ModelOmni:
+		return m
+	default:
+		return DefaultModel
+	}
+}
+
+// NormalizeOmniDuration clamps the Omni Flash clip length to a supported value
+// (4/6/8/10 s), defaulting to 8 for empty/unknown input.
+func NormalizeOmniDuration(s int) int {
+	switch s {
+	case 4, 6, 8, 10:
+		return s
+	default:
+		return 8
+	}
 }
 
 // Task is a single enqueued generation request and its outputs.

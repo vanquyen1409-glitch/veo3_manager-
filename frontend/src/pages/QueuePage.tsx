@@ -9,9 +9,10 @@ import { GetSettings } from '../../wailsjs/go/main/App';
 import type { db } from '../../wailsjs/go/models';
 
 const fallbackCfg: db.GenerationConfig = {
-  model: 'veo_3_1_t2v_fast',
+  model: 'veo_3_1_fast',
   aspectRatio: '16:9',
   outputCount: 1,
+  omniDurationSec: 8,
   seedBase: 0,
   outputDir: '',
 } as unknown as db.GenerationConfig;

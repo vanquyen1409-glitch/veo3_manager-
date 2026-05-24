@@ -93,11 +93,12 @@ func (r *SettingsRepo) loadBundle() (SettingsBundle, error) {
 		OutputDir:       r.defaultDirs.OutputDir,
 		ChromeDebugPort: 9222,
 		DefaultConfig: GenerationConfig{
-			Model:       "veo_3_1_t2v_fast",
-			AspectRatio: "16:9",
-			OutputCount: 1,
-			SeedBase:    0,
-			OutputDir:   r.defaultDirs.OutputDir,
+			Model:           ModelFast,
+			AspectRatio:     "16:9",
+			OutputCount:     1,
+			OmniDurationSec: 8,
+			SeedBase:        0,
+			OutputDir:       r.defaultDirs.OutputDir,
 		},
 		PollIntervalMs: 10000,
 		PollTimeoutMs:  300000,
@@ -119,17 +120,17 @@ func (r *SettingsRepo) loadBundle() (SettingsBundle, error) {
 	if b.DefaultConfig.OutputDir == "" {
 		b.DefaultConfig.OutputDir = b.OutputDir
 	}
-	// Coerce the deprecated `veo_3_1_t2v_fast_ultra` model key to the actual
-	// working model id discovered via labs.google API trace. Old settings
-	// rows from earlier alpha builds may still hold the wrong value.
-	if b.DefaultConfig.Model == "veo_3_1_t2v_fast_ultra" || b.DefaultConfig.Model == "" {
-		b.DefaultConfig.Model = "veo_3_1_t2v_fast"
-	}
+	// Coerce the stored model to a known family id. This migrates legacy raw
+	// videoModelKeys ("veo_3_1_t2v_fast", "..._ultra"), empty values, and old
+	// "<TBD:" placeholders to a valid family (see NormalizeModelFamily).
+	b.DefaultConfig.Model = NormalizeModelFamily(b.DefaultConfig.Model)
 	// Veo only ships landscape + portrait. If a stored config asks for 1:1
 	// (image-mode aspect), fall back to landscape.
 	if b.DefaultConfig.AspectRatio != "16:9" && b.DefaultConfig.AspectRatio != "9:16" {
 		b.DefaultConfig.AspectRatio = "16:9"
 	}
+	// Clamp the Omni Flash clip length to a supported value (4/6/8/10 s).
+	b.DefaultConfig.OmniDurationSec = NormalizeOmniDuration(b.DefaultConfig.OmniDurationSec)
 	// Normalize paths.
 	b.UserDataDir = filepath.Clean(b.UserDataDir)
 	b.OutputDir = filepath.Clean(b.OutputDir)

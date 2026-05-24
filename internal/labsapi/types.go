@@ -35,10 +35,11 @@ type FinalMedia struct {
 
 // SubmitConfig is the per-batch input the queue worker passes in.
 type SubmitConfig struct {
-	Model       string  `json:"model"`        // "veo_3_1_t2v_fast"
-	AspectRatio string  `json:"aspectRatio"`  // raw UI label "16:9" — converted via AspectRatioFor
-	OutputCount int     `json:"outputCount"`  // 1..4
-	Seeds       []int64 `json:"seeds,omitempty"`
+	Model           string  `json:"model"`           // family id, e.g. "veo_3_1_fast" — resolved via VideoModelKeyFor
+	AspectRatio     string  `json:"aspectRatio"`     // raw UI label "16:9" — converted via AspectRatioFor
+	OutputCount     int     `json:"outputCount"`     // 1..4
+	OmniDurationSec int     `json:"omniDurationSec"` // Omni Flash clip length 4/6/8/10 (ignored by other families)
+	Seeds           []int64 `json:"seeds,omitempty"`
 }
 
 // APIError surfaces non-2xx responses with the body for diagnostics.

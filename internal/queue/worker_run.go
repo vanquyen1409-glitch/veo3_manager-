@@ -219,10 +219,9 @@ func normalizeGenerationConfig(cfg db.GenerationConfig, defaultOutputDir string)
 	if cfg.OutputDir == "" {
 		cfg.OutputDir = defaultOutputDir
 	}
-	// Coerce stale model id from earlier builds to the actual working one.
-	if cfg.Model == "" || cfg.Model == "veo_3_1_t2v_fast_ultra" {
-		cfg.Model = "veo_3_1_t2v_fast"
-	}
+	// Coerce the model to a known family id (migrates legacy raw videoModelKeys,
+	// "..._ultra", empty, and old "<TBD:" placeholders to the Fast family).
+	cfg.Model = db.NormalizeModelFamily(cfg.Model)
 	// Veo only supports 16:9 + 9:16 — fall back to landscape on anything else.
 	if cfg.AspectRatio != "16:9" && cfg.AspectRatio != "9:16" {
 		cfg.AspectRatio = "16:9"
@@ -233,14 +232,17 @@ func normalizeGenerationConfig(cfg db.GenerationConfig, defaultOutputDir string)
 	if cfg.OutputCount > 4 {
 		cfg.OutputCount = 4
 	}
+	// Clamp the Omni Flash clip length to a supported value (4/6/8/10 s).
+	cfg.OmniDurationSec = db.NormalizeOmniDuration(cfg.OmniDurationSec)
 	return cfg
 }
 
 func buildSubmitConfig(cfg db.GenerationConfig) labsapi.SubmitConfig {
 	sub := labsapi.SubmitConfig{
-		Model:       cfg.Model,
-		AspectRatio: cfg.AspectRatio,
-		OutputCount: cfg.OutputCount,
+		Model:           cfg.Model,
+		AspectRatio:     cfg.AspectRatio,
+		OutputCount:     cfg.OutputCount,
+		OmniDurationSec: cfg.OmniDurationSec,
 	}
 	if cfg.SeedBase > 0 {
 		sub.Seeds = make([]int64, cfg.OutputCount)
